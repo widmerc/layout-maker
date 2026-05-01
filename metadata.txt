@@ -1,0 +1,12 @@
+[general]
+name=Layout Maker
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
+description=Layout Maker mit UI, Logo, Faltmarken-Funktion und Mehrsprachen-Support.
+version=0.2.0
+author=Claude Widmer
+email=example@example.com
+about=QGIS-4-Plugin mit UI-Dialog, Startbutton, A4-Faltmarken, Faltmarkendicke und echter i18n-Unterstützung.
+category=Layout
+icon=icons/logo.png
+hasProcessingProvider=no

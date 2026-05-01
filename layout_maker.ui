@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LayoutMakerDialogBase</class>
+ <widget class="QDialog" name="LayoutMakerDialogBase">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>380</width><height>280</height></rect></property>
+  <property name="windowTitle"><string>Layout Maker</string></property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item><widget class="QLabel" name="labelLogo"><property name="text"><string/></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+   <item><widget class="QPushButton" name="pushButton"><property name="text"><string>Faltmarken setzen</string></property></widget></item>
+   <item><widget class="QPushButton" name="pushButton2"><property name="text"><string>Neues Layout aus Vorlage</string></property></widget></item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
