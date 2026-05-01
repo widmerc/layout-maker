@@ -1,12 +1,12 @@
 [general]
 name=Layout Maker
-qgisMinimumVersion=4.0
+qgisMinimumVersion=3.2
 qgisMaximumVersion=4.99
 description=Automates the creation of print-ready A4 map layouts with fold marks, custom logo, and multi-language support.
-version=0.2.0
+version=0.3.0
 author=Claude Widmer
 email=example@example.com
-about=Layout Maker is a lightweight QGIS 4 plugin (Qt6) that generates print-ready A4 map layouts from your current map view. Features include configurable fold marks (Faltmarken), custom logo embedding, a clean UI dialog, an extent capture tool, and full i18n/multi-language support. Requires QGIS 4.0 or later (Qt6).
+about=Layout Maker is a lightweight QGIS 4 plugin (Qt6) that generates print-ready map layouts from your current map view. Features include configurable fold marks (Faltmarken), custom logo embedding, a clean UI dialog, an extent capture tool, and full i18n/multi-language support. Requires QGIS 3.0 or later (Qt4/Qt6).
 category=Layout
 icon=icons/logo.png
 homepage=https://github.com/widmerc/layout-maker
@@ -16,5 +16,5 @@ tags=layout,print,fold marks,faltmarken,A4,Qt6,QGIS4,cartography
 hasProcessingProvider=no
 server=False
 supportsQt6=True
-experimental=False
+experimental=True
 deprecated=False
