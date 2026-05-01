@@ -88,6 +88,7 @@ class LayoutMakerDialog(QDialog):
         super().__init__(parent)
         self.iface = iface
         self.icon_path = icon_path
+        self._extent_dlg = None   # Referenz auf offenen Extent-Dialog
         self.setWindowTitle('Layout Maker')
         self.setMinimumWidth(420)
         self.setStyleSheet(_MAIN_STYLE)
@@ -100,7 +101,7 @@ class LayoutMakerDialog(QDialog):
         root.setSpacing(14)
         root.setContentsMargins(20, 20, 20, 20)
 
-        # ── Header ─────────────────────────────────────────────────────────
+        # ── Header ────────────────────────────────────────────────────
         header = QHBoxLayout()
         if self.icon_path and os.path.exists(self.icon_path):
             logo_lbl = QLabel()
@@ -120,7 +121,7 @@ class LayoutMakerDialog(QDialog):
         root.addLayout(header)
         root.addWidget(_make_divider())
 
-        # ── Karte 1 ───────────────────────────────────────────────────────
+        # ── Karte 1 ───────────────────────────────────────────────────
         card1 = QFrame(); card1.setObjectName('card')
         c1 = QVBoxLayout(card1); c1.setSpacing(6); c1.setContentsMargins(14, 12, 14, 12)
         lbl1 = QLabel('① Faltmarken hinzufügen')
@@ -132,7 +133,7 @@ class LayoutMakerDialog(QDialog):
         c1.addWidget(lbl1); c1.addWidget(desc1); c1.addSpacing(4); c1.addWidget(btn1)
         root.addWidget(card1)
 
-        # ── Karte 2 ───────────────────────────────────────────────────────
+        # ── Karte 2 ───────────────────────────────────────────────────
         card2 = QFrame(); card2.setObjectName('card')
         c2 = QVBoxLayout(card2); c2.setSpacing(6); c2.setContentsMargins(14, 12, 14, 12)
         lbl2 = QLabel('② Layout aus Vorlage erstellen')
@@ -144,13 +145,13 @@ class LayoutMakerDialog(QDialog):
         c2.addWidget(lbl2); c2.addWidget(desc2); c2.addSpacing(4); c2.addWidget(btn2)
         root.addWidget(card2)
 
-        # ── Karte 3 ───────────────────────────────────────────────────────
+        # ── Karte 3 ───────────────────────────────────────────────────
         card3 = QFrame(); card3.setObjectName('card')
         c3 = QVBoxLayout(card3); c3.setSpacing(6); c3.setContentsMargins(14, 12, 14, 12)
         lbl3 = QLabel('③ Plan aus Kartenausschnitt erstellen')
         lbl3.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
         desc3 = QLabel(
-            'Ausschnitt auf der Karte aufziehen, Massstab eingeben \u2013\n'
+            'Ausschnitt auf der Karte aufziehen, Massstab eingeben –\n'
             'Plangrösse wird berechnet und Plan direkt erstellt.'
         )
         desc3.setObjectName('desc'); desc3.setWordWrap(True)
@@ -168,6 +169,15 @@ class LayoutMakerDialog(QDialog):
         create_layout_from_template(self.iface, self)
 
     def _run_from_extent(self):
-        # Hauptdialog schliessen: der MapExtentDialog regelt sich selbst
+        # Hauptdialog verstecken → Canvas frei bedienbar
         self.hide()
-        create_layout_from_extent(self.iface, self)
+        self._extent_dlg = create_layout_from_extent(self.iface, self)
+        # Wenn Extent-Dialog geschlossen wird → Hauptdialog wieder zeigen
+        if self._extent_dlg is not None:
+            self._extent_dlg.finished.connect(self._on_extent_dlg_closed)
+
+    def _on_extent_dlg_closed(self, _result):
+        self._extent_dlg = None
+        self.show()
+        self.raise_()
+        self.activateWindow()
