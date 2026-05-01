@@ -102,7 +102,6 @@ class LayoutMakerDialog(QDialog):
 
         # ── Header ─────────────────────────────────────────────────────────
         header = QHBoxLayout()
-
         if self.icon_path and os.path.exists(self.icon_path):
             logo_lbl = QLabel()
             px = QPixmap(self.icon_path).scaled(
@@ -113,99 +112,51 @@ class LayoutMakerDialog(QDialog):
             logo_lbl.setPixmap(px)
             logo_lbl.setFixedSize(52, 52)
             header.addWidget(logo_lbl)
-
         title_block = QVBoxLayout()
-        title_lbl = QLabel('Layout Maker')
-        title_lbl.setObjectName('title')
-        sub_lbl = QLabel('QGIS Print-Layout Assistent')
-        sub_lbl.setObjectName('subtitle')
-        title_block.addWidget(title_lbl)
-        title_block.addWidget(sub_lbl)
-        header.addLayout(title_block)
-        header.addStretch()
+        title_lbl = QLabel('Layout Maker'); title_lbl.setObjectName('title')
+        sub_lbl   = QLabel('QGIS Print-Layout Assistent'); sub_lbl.setObjectName('subtitle')
+        title_block.addWidget(title_lbl); title_block.addWidget(sub_lbl)
+        header.addLayout(title_block); header.addStretch()
         root.addLayout(header)
-
         root.addWidget(_make_divider())
 
-        # ── Karte 1: Faltmarken auf bestehendes Layout ─────────────────────
-        card1 = QFrame()
-        card1.setObjectName('card')
-        c1 = QVBoxLayout(card1)
-        c1.setSpacing(6)
-        c1.setContentsMargins(14, 12, 14, 12)
-
+        # ── Karte 1 ───────────────────────────────────────────────────────
+        card1 = QFrame(); card1.setObjectName('card')
+        c1 = QVBoxLayout(card1); c1.setSpacing(6); c1.setContentsMargins(14, 12, 14, 12)
         lbl1 = QLabel('① Faltmarken hinzufügen')
         lbl1.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
-
-        desc1 = QLabel(
-            'Setzt Faltmarken im A4-Raster auf ein bestehendes Print-Layout.\n'
-            'Das Layout muss bereits im Projekt vorhanden sein.'
-        )
-        desc1.setObjectName('desc')
-        desc1.setWordWrap(True)
-
-        btn1 = QPushButton('  Faltmarken setzen …')
-        btn1.setStyleSheet(_BTN_PRIMARY)
+        desc1 = QLabel('Setzt Faltmarken im A4-Raster auf ein bestehendes Print-Layout.\nDas Layout muss bereits im Projekt vorhanden sein.')
+        desc1.setObjectName('desc'); desc1.setWordWrap(True)
+        btn1 = QPushButton('  Faltmarken setzen …'); btn1.setStyleSheet(_BTN_PRIMARY)
         btn1.clicked.connect(self._run_faltmarken)
-
-        c1.addWidget(lbl1)
-        c1.addWidget(desc1)
-        c1.addSpacing(4)
-        c1.addWidget(btn1)
+        c1.addWidget(lbl1); c1.addWidget(desc1); c1.addSpacing(4); c1.addWidget(btn1)
         root.addWidget(card1)
 
-        # ── Karte 2: Layout aus Vorlage ────────────────────────────────────
-        card2 = QFrame()
-        card2.setObjectName('card')
-        c2 = QVBoxLayout(card2)
-        c2.setSpacing(6)
-        c2.setContentsMargins(14, 12, 14, 12)
-
+        # ── Karte 2 ───────────────────────────────────────────────────────
+        card2 = QFrame(); card2.setObjectName('card')
+        c2 = QVBoxLayout(card2); c2.setSpacing(6); c2.setContentsMargins(14, 12, 14, 12)
         lbl2 = QLabel('② Layout aus Vorlage erstellen')
         lbl2.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
-
-        desc2 = QLabel(
-            'Importiert eine .qpt-Vorlagendatei, positioniert den Plankopf\n'
-            'und fügt automatisch Faltmarken hinzu.'
-        )
-        desc2.setObjectName('desc')
-        desc2.setWordWrap(True)
-
-        btn2 = QPushButton('  Layout aus Vorlage erstellen …')
-        btn2.setStyleSheet(_BTN_SECONDARY)
+        desc2 = QLabel('Importiert eine .qpt-Vorlagendatei, positioniert den Plankopf\nund fügt automatisch Faltmarken hinzu.')
+        desc2.setObjectName('desc'); desc2.setWordWrap(True)
+        btn2 = QPushButton('  Layout aus Vorlage erstellen …'); btn2.setStyleSheet(_BTN_SECONDARY)
         btn2.clicked.connect(self._run_template)
-
-        c2.addWidget(lbl2)
-        c2.addWidget(desc2)
-        c2.addSpacing(4)
-        c2.addWidget(btn2)
+        c2.addWidget(lbl2); c2.addWidget(desc2); c2.addSpacing(4); c2.addWidget(btn2)
         root.addWidget(card2)
 
-        # ── Karte 3: Plan aus Kartenausschnitt ─────────────────────────────
-        card3 = QFrame()
-        card3.setObjectName('card')
-        c3 = QVBoxLayout(card3)
-        c3.setSpacing(6)
-        c3.setContentsMargins(14, 12, 14, 12)
-
+        # ── Karte 3 ───────────────────────────────────────────────────────
+        card3 = QFrame(); card3.setObjectName('card')
+        c3 = QVBoxLayout(card3); c3.setSpacing(6); c3.setContentsMargins(14, 12, 14, 12)
         lbl3 = QLabel('③ Plan aus Kartenausschnitt erstellen')
         lbl3.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
-
         desc3 = QLabel(
-            'Übernimmt den aktuellen Ausschnitt aus dem Hauptfenster, berechnet\n'
-            'die Plangrösse aus Massstab und Extent und erstellt direkt einen Plan.'
+            'Ausschnitt auf der Karte aufziehen, Massstab eingeben \u2013\n'
+            'Plangrösse wird berechnet und Plan direkt erstellt.'
         )
-        desc3.setObjectName('desc')
-        desc3.setWordWrap(True)
-
-        btn3 = QPushButton('  Plan aus Kartenausschnitt …')
-        btn3.setStyleSheet(_BTN_TERTIARY)
+        desc3.setObjectName('desc'); desc3.setWordWrap(True)
+        btn3 = QPushButton('  Plan aus Kartenausschnitt …'); btn3.setStyleSheet(_BTN_TERTIARY)
         btn3.clicked.connect(self._run_from_extent)
-
-        c3.addWidget(lbl3)
-        c3.addWidget(desc3)
-        c3.addSpacing(4)
-        c3.addWidget(btn3)
+        c3.addWidget(lbl3); c3.addWidget(desc3); c3.addSpacing(4); c3.addWidget(btn3)
         root.addWidget(card3)
 
         root.addStretch()
@@ -217,4 +168,6 @@ class LayoutMakerDialog(QDialog):
         create_layout_from_template(self.iface, self)
 
     def _run_from_extent(self):
+        # Hauptdialog schliessen: der MapExtentDialog regelt sich selbst
+        self.hide()
         create_layout_from_extent(self.iface, self)

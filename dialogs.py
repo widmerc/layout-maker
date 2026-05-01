@@ -75,6 +75,15 @@ _BTN_OK = (
 )
 _BTN_CANCEL = "QPushButton { min-height:26px; min-width:80px; }"
 
+_BTN_DRAW = (
+    "QPushButton { background-color:#e8f4f7; color:#1f4a58;"
+    " border:2px solid #3d8fa0; border-radius:4px;"
+    " padding:5px 14px; min-height:26px; font-weight:bold; }"
+    "QPushButton:hover   { background-color:#c5e3eb; }"
+    "QPushButton:pressed { background-color:#a8d5e0; }"
+    "QPushButton:checked { background-color:#2c5f6e; color:white; border-color:#1f4a58; }"
+)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Kleine Helfer
@@ -96,7 +105,7 @@ def _spinbox(value, lo, hi, decimals, suffix=' mm'):
 
 
 def _bbox(parent_dlg):
-    """QDialogButtonBox (OK/Abbrechen), PyQt6-sicher. Gibt (bbox, ok_btn) zurück."""
+    """QDialogButtonBox (OK/Abbrechen), PyQt6-sicher."""
     bb = QDialogButtonBox(
         QDialogButtonBox.StandardButton.Ok |
         QDialogButtonBox.StandardButton.Cancel
@@ -111,7 +120,7 @@ def _bbox(parent_dlg):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  PageSizeWidget – wiederverwendbare Seitenformat-Auswahl
+#  PageSizeWidget
 # ─────────────────────────────────────────────────────────────────────────────
 
 _PAGE_SIZES = {
@@ -125,11 +134,6 @@ _PAGE_SIZES = {
 
 
 class PageSizeWidget(QWidget):
-    """
-    Kompaktes Widget zur Seitenformat-Auswahl.
-    Liefert get_size_mm() → (breite_mm, hoehe_mm).
-    """
-
     def __init__(self, default_format='A3', default_landscape=True, parent=None):
         super().__init__(parent)
         self._build(default_format, default_landscape)
@@ -232,17 +236,9 @@ class PageSizeWidget(QWidget):
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  FaltmarkenDialog
-#  Hinweis: «Ursprung» entfernt – er wird immer von der Plankopf-Position
-#            abgeleitet (Plankopf unten rechts → Ursprung unten rechts).
 # ─────────────────────────────────────────────────────────────────────────────
 
 class FaltmarkenDialog(QDialog):
-    """
-    Layout-Auswahl + optionale Seitengrössenänderung + Faltmarken-Parameter.
-    Der Ursprung ergibt sich immer aus der Position des Plankopfs und wird
-    nicht mehr separat abgefragt.
-    """
-
     def __init__(self, layout_names, parent=None):
         super().__init__(parent)
         self.setWindowTitle(tr('Faltmarken hinzufügen'))
@@ -258,7 +254,6 @@ class FaltmarkenDialog(QDialog):
         hdr.setObjectName('header'); root.addWidget(hdr)
         root.addWidget(_divider())
 
-        # Ziel-Layout
         grp1 = QGroupBox(tr('Ziel-Layout'))
         f1 = QFormLayout(grp1)
         f1.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f1.setSpacing(8)
@@ -266,7 +261,6 @@ class FaltmarkenDialog(QDialog):
         f1.addRow(tr('Layout:'), self.combo)
         root.addWidget(grp1)
 
-        # Seitengrösse (optional, einklappbar)
         grp2 = QGroupBox(tr('Seitengrösse überschreiben'))
         grp2.setCheckable(True); grp2.setChecked(False)
         self._grp_page = grp2
@@ -278,33 +272,24 @@ class FaltmarkenDialog(QDialog):
         v2.addWidget(self.page_size_w)
         root.addWidget(grp2)
 
-        # Faltmarken-Parameter (ohne Ursprung-ComboBox)
         grp3 = QGroupBox(tr('Faltmarken-Parameter'))
         f3 = QFormLayout(grp3)
         f3.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f3.setSpacing(8)
-
         self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
-        self.spin_len.setToolTip(tr('Länge jeder Faltmarke in mm'))
         f3.addRow(tr('Markenlänge:'), self.spin_len)
-
         self.spin_w = _spinbox(0.25, 0.01, 5.0, 2)
-        self.spin_w.setToolTip(tr('Strichstärke in mm'))
         f3.addRow(tr('Strichstärke:'), self.spin_w)
-
         self.chk_remove = QCheckBox(tr('Bestehende Faltmarken (fm_*) vorher löschen'))
         self.chk_remove.setChecked(True)
         f3.addRow('', self.chk_remove)
-
         root.addWidget(grp3)
 
-        # Rahmen
         grp4 = QGroupBox(tr('Rahmen'))
         grp4.setCheckable(True); grp4.setChecked(True)
         self._grp_border = grp4
         f4 = QFormLayout(grp4)
         f4.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f4.setSpacing(8)
         self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
-        self.spin_border.setToolTip(tr('Strichstärke des Rahmens in mm'))
         f4.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
         root.addWidget(grp4)
 
@@ -331,11 +316,6 @@ class FaltmarkenDialog(QDialog):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TemplateDialog(QDialog):
-    """
-    Vorlagendatei · Layoutname · Seitengrösse (optional) · Plankopf-Position ·
-    Faltmarken-Parameter – alles in einem Formular.
-    """
-
     ANCHORS = ['oben links', 'oben rechts', 'unten links', 'unten rechts']
 
     def __init__(self, parent=None):
@@ -353,7 +333,6 @@ class TemplateDialog(QDialog):
         hdr.setObjectName('header'); hdr.setWordWrap(True)
         root.addWidget(hdr); root.addWidget(_divider())
 
-        # Vorlage
         grp1 = QGroupBox(tr('Vorlagendatei'))
         f1 = QFormLayout(grp1)
         f1.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f1.setSpacing(8)
@@ -367,7 +346,6 @@ class TemplateDialog(QDialog):
         f1.addRow(tr('Vorlage:'), row)
         root.addWidget(grp1)
 
-        # Layout-Einstellungen
         grp2 = QGroupBox(tr('Layout-Einstellungen'))
         f2 = QFormLayout(grp2)
         f2.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f2.setSpacing(8)
@@ -378,14 +356,11 @@ class TemplateDialog(QDialog):
         self.combo_anchor = QComboBox()
         self.combo_anchor.addItems(self.ANCHORS)
         self.combo_anchor.setCurrentText('unten rechts')
-        self.combo_anchor.setToolTip(tr('Position des Plankopfs auf der Seite'))
         f2.addRow(tr('Plankopf-Position:'), self.combo_anchor)
         root.addWidget(grp2)
 
-        # Seitengrösse (einklappbar)
         grp3 = QGroupBox(tr('Seitengrösse überschreiben'))
-        grp3.setCheckable(True)
-        grp3.setChecked(False)
+        grp3.setCheckable(True); grp3.setChecked(False)
         self._grp_page = grp3
         v3 = QVBoxLayout(grp3); v3.setSpacing(4)
         note = QLabel(tr(
@@ -398,29 +373,21 @@ class TemplateDialog(QDialog):
         v3.addWidget(self.page_size_w)
         root.addWidget(grp3)
 
-        # Faltmarken
         grp4 = QGroupBox(tr('Faltmarken-Parameter'))
         f4 = QFormLayout(grp4)
         f4.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f4.setSpacing(8)
-
         self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
-        self.spin_len.setToolTip(tr('Länge jeder Faltmarke in mm'))
         f4.addRow(tr('Markenlänge:'), self.spin_len)
-
         self.spin_w = _spinbox(0.25, 0.05, 5.0, 2)
-        self.spin_w.setToolTip(tr('Strichstärke in mm'))
         f4.addRow(tr('Strichstärke:'), self.spin_w)
-
         root.addWidget(grp4)
 
-        # Rahmen
         grp5 = QGroupBox(tr('Rahmen'))
         grp5.setCheckable(True); grp5.setChecked(True)
         self._grp_border = grp5
         f5 = QFormLayout(grp5)
         f5.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f5.setSpacing(8)
         self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
-        self.spin_border.setToolTip(tr('Strichstärke des Rahmens in mm'))
         f5.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
         root.addWidget(grp5)
 
@@ -443,10 +410,7 @@ class TemplateDialog(QDialog):
 
     def get_values(self):
         override_size = self._grp_page.isChecked()
-        if override_size:
-            w, h = self.page_size_w.get_size_mm()
-        else:
-            w, h = None, None
+        w, h = self.page_size_w.get_size_mm() if override_size else (None, None)
         return {
             'template_path':  self.edit_path.text().strip(),
             'layout_name':    self.edit_name.text().strip(),
@@ -463,26 +427,40 @@ class TemplateDialog(QDialog):
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  MapExtentDialog  –  Plan aus Kartenausschnitt erstellen
+#
+#  Workflow:
+#    1. Dialog öffnet sich nicht-modal (show), damit der Nutzer das
+#       QGIS-Hauptfenster bedienen kann.
+#    2. «Ausschnitt aufziehen»-Button versteckt den Dialog, aktiviert
+#       den RectangleMapTool auf dem Canvas.
+#    3. Nach dem Aufziehen wird der Dialog wieder sichtbar und die
+#       Felder werden befüllt.
+#    4. Nutzer kann Ausschnitt manuell nachkorrigieren.
+#    5. OK erstellt den Plan.
 # ─────────────────────────────────────────────────────────────────────────────
 
 class MapExtentDialog(QDialog):
     """
-    Erstellt einen Plan direkt aus dem aktuellen Kartenausschnitt:
-      1. Extent aus QGIS-Hauptfenster übernehmen
-      2. Massstab eingeben
-      3. Plangrösse wird automatisch berechnet
-      4. Plankopf-Vorlage wählen (optional)
-      5. Plan wird direkt erstellt inkl. Faltmarken
+    Nicht-modaler Dialog. Öffnet sich mit show(). Der Aufrufer
+    muss exec_and_get() verwenden oder auf das accepted-Signal reagieren.
     """
 
     ANCHORS = ['oben links', 'oben rechts', 'unten links', 'unten rechts']
 
     def __init__(self, iface, parent=None):
         super().__init__(parent)
-        self.iface = iface
+        self.iface       = iface
+        self._map_tool   = None
+        self._prev_tool  = None
         self.setWindowTitle(tr('Plan aus Kartenausschnitt erstellen'))
         self.setMinimumWidth(500)
         self.setStyleSheet(_STYLE)
+        # Nicht-modal + immer im Vordergrund bleiben, aber Hauptfenster bedienbar
+        self.setWindowFlags(
+            Qt.WindowType.Window |
+            Qt.WindowType.WindowCloseButtonHint |
+            Qt.WindowType.WindowStaysOnTopHint
+        )
         self._build()
         self._load_current_extent()
 
@@ -490,28 +468,34 @@ class MapExtentDialog(QDialog):
         root = QVBoxLayout(self)
         root.setSpacing(12); root.setContentsMargins(16, 16, 16, 16)
 
-        hdr = QLabel(tr('Neuen Plan aus aktuellem Kartenausschnitt erstellen'))
+        hdr = QLabel(tr('Neuen Plan aus Kartenausschnitt erstellen'))
         hdr.setObjectName('header'); hdr.setWordWrap(True)
         root.addWidget(hdr)
-        desc = QLabel(tr(
-            'Der aktuelle Ausschnitt im Hauptfenster wird verwendet, um die '
-            'Plangrösse beim gewünschten Massstab automatisch zu berechnen.'
-        ))
-        desc.setObjectName('desc'); desc.setWordWrap(True)
-        root.addWidget(desc)
         root.addWidget(_divider())
 
-        # ── Kartenausschnitt ──────────────────────────────────────────────
-        grp_ext = QGroupBox(tr('Kartenausschnitt (Map Extent)'))
-        f_ext = QFormLayout(grp_ext)
-        f_ext.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_ext.setSpacing(8)
+        # ── Kartenausschnitt ────────────────────────────────────────────
+        grp_ext = QGroupBox(tr('Kartenausschnitt (Extent)'))
+        v_ext = QVBoxLayout(grp_ext); v_ext.setSpacing(8)
 
-        self.spin_xmin = _spinbox(0.0, -1e9, 1e9, 4, ' m')
-        self.spin_xmax = _spinbox(0.0, -1e9, 1e9, 4, ' m')
-        self.spin_ymin = _spinbox(0.0, -1e9, 1e9, 4, ' m')
-        self.spin_ymax = _spinbox(0.0, -1e9, 1e9, 4, ' m')
-        for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
-            sb.setMaximumWidth(180)
+        # Aufzieh-Button  –  versteckt den Dialog und aktiviert Map-Tool
+        self.btn_draw = QPushButton(tr('⤵  Ausschnitt auf Karte aufziehen'))
+        self.btn_draw.setStyleSheet(_BTN_DRAW)
+        self.btn_draw.setToolTip(tr(
+            'Dialog wird temporär ausgeblendet.\n'
+            'Auf der Karte ein Rechteck aufziehen (Linksklick + Ziehen).\n'
+            'ESC bricht ab.'
+        ))
+        self.btn_draw.clicked.connect(self._start_draw)
+        v_ext.addWidget(self.btn_draw)
+
+        # Koordinatenfelder
+        f_ext = QFormLayout(); f_ext.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        f_ext.setSpacing(6)
+
+        self.spin_xmin = _spinbox(0.0, -1e9, 1e9, 4, ' m'); self.spin_xmin.setMaximumWidth(180)
+        self.spin_xmax = _spinbox(0.0, -1e9, 1e9, 4, ' m'); self.spin_xmax.setMaximumWidth(180)
+        self.spin_ymin = _spinbox(0.0, -1e9, 1e9, 4, ' m'); self.spin_ymin.setMaximumWidth(180)
+        self.spin_ymax = _spinbox(0.0, -1e9, 1e9, 4, ' m'); self.spin_ymax.setMaximumWidth(180)
 
         row_x = QHBoxLayout()
         row_x.addWidget(QLabel('X min:')); row_x.addWidget(self.spin_xmin)
@@ -529,13 +513,14 @@ class MapExtentDialog(QDialog):
         f_ext.addRow(row_y)
 
         btn_reload = QPushButton(tr('⟳  Aktuellen Ausschnitt übernehmen'))
-        btn_reload.setToolTip(tr('Übernimmt den jetzt sichtbaren Ausschnitt aus dem Hauptfenster'))
+        btn_reload.setToolTip(tr('Setzt die Koordinaten auf den jetzt sichtbaren Ausschnitt.'))
         btn_reload.clicked.connect(self._load_current_extent)
         f_ext.addRow('', btn_reload)
 
+        v_ext.addLayout(f_ext)
         root.addWidget(grp_ext)
 
-        # ── Massstab & berechnete Plangrösse ─────────────────────────────
+        # ── Massstab & berechnete Plangrösse ───────────────────────────
         grp_scale = QGroupBox(tr('Massstab & berechnete Plangrösse'))
         f_scale = QFormLayout(grp_scale)
         f_scale.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_scale.setSpacing(8)
@@ -555,28 +540,23 @@ class MapExtentDialog(QDialog):
         self.lbl_size_result = QLabel('–')
         self.lbl_size_result.setObjectName('info')
         f_scale.addRow(tr('Plangrösse (berechnet):'), self.lbl_size_result)
-
         root.addWidget(grp_scale)
 
-        # ── Layout-Einstellungen ─────────────────────────────────────────
+        # ── Layout-Einstellungen ──────────────────────────────────────
         grp_lay = QGroupBox(tr('Layout-Einstellungen'))
         f_lay = QFormLayout(grp_lay)
         f_lay.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_lay.setSpacing(8)
-
         self.edit_name = QLineEdit()
         self.edit_name.setPlaceholderText(tr('z. B.  Plan_1000'))
         self.edit_name.setText(tr('Neuer Plan'))
         f_lay.addRow(tr('Layoutname:'), self.edit_name)
-
         self.combo_anchor = QComboBox()
         self.combo_anchor.addItems(self.ANCHORS)
         self.combo_anchor.setCurrentText('unten rechts')
-        self.combo_anchor.setToolTip(tr('Position des Plankopfs auf der Seite'))
         f_lay.addRow(tr('Plankopf-Position:'), self.combo_anchor)
-
         root.addWidget(grp_lay)
 
-        # ── Plankopf-Vorlage (optional) ──────────────────────────────────
+        # ── Plankopf-Vorlage (optional) ───────────────────────────────
         grp_tpl = QGroupBox(tr('Plankopf-Vorlage (.qpt) – optional'))
         grp_tpl.setCheckable(True); grp_tpl.setChecked(False)
         self._grp_tpl = grp_tpl
@@ -597,37 +577,31 @@ class MapExtentDialog(QDialog):
         v_tpl.addLayout(row_tpl)
         root.addWidget(grp_tpl)
 
-        # ── Faltmarken-Parameter ─────────────────────────────────────────
+        # ── Faltmarken ─────────────────────────────────────────────────
         grp_fm = QGroupBox(tr('Faltmarken-Parameter'))
         f_fm = QFormLayout(grp_fm)
         f_fm.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_fm.setSpacing(8)
-
         self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
-        self.spin_len.setToolTip(tr('Länge jeder Faltmarke in mm'))
         f_fm.addRow(tr('Markenlänge:'), self.spin_len)
-
         self.spin_lw = _spinbox(0.25, 0.05, 5.0, 2)
-        self.spin_lw.setToolTip(tr('Strichstärke in mm'))
         f_fm.addRow(tr('Strichstärke:'), self.spin_lw)
-
         root.addWidget(grp_fm)
 
-        # ── Rahmen ───────────────────────────────────────────────────────
+        # ── Rahmen ────────────────────────────────────────────────────
         grp_brd = QGroupBox(tr('Rahmen'))
         grp_brd.setCheckable(True); grp_brd.setChecked(True)
         self._grp_border = grp_brd
         f_brd = QFormLayout(grp_brd)
         f_brd.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_brd.setSpacing(8)
         self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
-        self.spin_border.setToolTip(tr('Strichstärke des Rahmens in mm'))
         f_brd.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
         root.addWidget(grp_brd)
 
-        # ── Buttons ──────────────────────────────────────────────────────
+        # ── OK / Abbrechen ─────────────────────────────────────────────
         bb, self._ok_btn = _bbox(self)
         root.addWidget(bb)
 
-        # Signale für Live-Berechnung
+        # Live-Berechnung
         for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
             sb.valueChanged.connect(self._update_size_label)
         self.spin_scale.valueChanged.connect(self._update_size_label)
@@ -635,8 +609,58 @@ class MapExtentDialog(QDialog):
         self._validate()
         self._update_size_label()
 
+    # ── Aufzieh-Logik ────────────────────────────────────────────────
+
+    def _start_draw(self):
+        """Dialog minimieren, Map-Tool aktivieren."""
+        from .extent_tool import RectangleMapTool
+        canvas = self.iface.mapCanvas()
+        self._prev_tool = canvas.mapTool()
+        self._map_tool  = RectangleMapTool(canvas)
+        self._map_tool.extent_selected.connect(self._on_extent_selected)
+        self._map_tool.cancelled.connect(self._on_draw_cancelled)
+        self.hide()   # Dialog ausblenden – Hauptfenster ist jetzt frei
+        canvas.setMapTool(self._map_tool)
+        # Statuszeilenmeldung
+        self.iface.mainWindow().statusBar().showMessage(
+            tr('Ausschnitt aufziehen: Linksklick + Ziehen. ESC = Abbruch.'), 0
+        )
+
+    def _on_extent_selected(self, rect):
+        """Wird aufgerufen nachdem der Nutzer das Rechteck aufgezogen hat."""
+        self.iface.mainWindow().statusBar().clearMessage()
+        self._restore_tool()
+        for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
+            sb.blockSignals(True)
+        self.spin_xmin.setValue(rect.xMinimum())
+        self.spin_xmax.setValue(rect.xMaximum())
+        self.spin_ymin.setValue(rect.yMinimum())
+        self.spin_ymax.setValue(rect.yMaximum())
+        for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
+            sb.blockSignals(False)
+        self._update_size_label()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+    def _on_draw_cancelled(self):
+        self.iface.mainWindow().statusBar().clearMessage()
+        self._restore_tool()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+    def _restore_tool(self):
+        canvas = self.iface.mapCanvas()
+        if self._prev_tool is not None:
+            canvas.setMapTool(self._prev_tool)
+        else:
+            canvas.unsetMapTool(self._map_tool)
+        self._map_tool = None
+
+    # ── Hilfsmethoden ───────────────────────────────────────────────
+
     def _load_current_extent(self):
-        """Übernimmt den aktuellen Kartenausschnitt aus dem QGIS-Hauptfenster."""
         try:
             ext = self.iface.mapCanvas().extent()
             for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
@@ -652,14 +676,12 @@ class MapExtentDialog(QDialog):
             pass
 
     def _update_size_label(self):
-        """Berechnet Plangrösse in mm aus Extent + Massstab und zeigt sie an."""
         dx = self.spin_xmax.value() - self.spin_xmin.value()
         dy = self.spin_ymax.value() - self.spin_ymin.value()
         scale = self.spin_scale.value()
         if dx <= 0 or dy <= 0 or scale <= 0:
-            self.lbl_size_result.setText(tr('– (ungültiger Ausschnitt oder Massstab)'))
+            self.lbl_size_result.setText(tr('– (ungültiger Ausschnitt)'))
             return
-        # Karteneinheiten → mm: teile durch Massstab, mal 1000 (m→mm)
         w_mm = (dx / scale) * 1000.0
         h_mm = (dy / scale) * 1000.0
         self.lbl_size_result.setText(f'{w_mm:.1f} × {h_mm:.1f} mm')
@@ -674,13 +696,10 @@ class MapExtentDialog(QDialog):
         self._ok_btn.setEnabled(bool(self.edit_name.text().strip()))
 
     def get_computed_size_mm(self):
-        """Gibt (breite_mm, hoehe_mm) der Kartenfläche zurück."""
         dx = self.spin_xmax.value() - self.spin_xmin.value()
         dy = self.spin_ymax.value() - self.spin_ymin.value()
         scale = self.spin_scale.value()
-        w_mm = (dx / scale) * 1000.0
-        h_mm = (dy / scale) * 1000.0
-        return w_mm, h_mm
+        return (dx / scale) * 1000.0, (dy / scale) * 1000.0
 
     def get_values(self):
         w_mm, h_mm = self.get_computed_size_mm()
@@ -702,3 +721,9 @@ class MapExtentDialog(QDialog):
             'add_border':     self._grp_border.isChecked(),
             'border_width':   self.spin_border.value(),
         }
+
+    def closeEvent(self, event):
+        """Sicherstellen, dass Map-Tool deaktiviert wird wenn Dialog geschlossen."""
+        if self._map_tool is not None:
+            self._restore_tool()
+        super().closeEvent(event)
