@@ -48,12 +48,12 @@ def create_layout_from_template(iface, parent=None):
     template_path = vals['template_path']
     layout_name   = vals['layout_name']
     anchor        = vals['anchor']
+    override_size = vals['override_size']
     page_w        = vals['page_width']
     page_h        = vals['page_height']
     origin_index  = vals['origin_index']
     mark_len      = vals['mark_len']
     line_width    = vals['line_width']
-    remove_old    = vals['remove_old']
     add_border    = vals['add_border']
     border_width  = vals['border_width']
 
@@ -87,20 +87,26 @@ def create_layout_from_template(iface, parent=None):
                             tr('Vorlage konnte nicht geladen werden.'))
         return
 
-    # 1. Seitengroesse setzen (VOR dem Verschieben der Elemente)
-    _set_page_size(layout, page_w, page_h)
+    # 1. Seitengroesse: nur wenn Nutzer es explizit aktiviert hat
+    if override_size and page_w and page_h:
+        _set_page_size(layout, page_w, page_h)
 
-    # 2. Plankopf an gewaehlte Ecke verschieben
+    # 2. Aktuelle Seitengroesse lesen (aus Vorlage oder ueberschrieben)
+    page   = layout.pageCollection().page(0)
+    page_w = page.pageSize().width()
+    page_h = page.pageSize().height()
+
+    # 3. Plankopf an gewaehlte Ecke verschieben
     tpl_w, tpl_h = _template_bounds(items)
     _move_items(items, page_w, page_h, tpl_w, tpl_h, anchor)
 
-    # 3. Faltmarken mit allen neuen Parametern
+    # 4. Faltmarken setzen (remove_old=False: neues Layout hat keine alten)
     draw_faltmarken(
         layout,
         mark_len     = mark_len,
         line_width   = line_width,
         origin_index = origin_index,
-        remove_old   = remove_old,
+        remove_old   = False,
         add_border   = add_border,
         border_width = border_width,
     )

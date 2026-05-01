@@ -264,8 +264,8 @@ class FaltmarkenDialog(QDialog):
         f1.addRow(tr('Layout:'), self.combo)
         root.addWidget(grp1)
 
-        # Seitengrösse (optional)
-        grp2 = QGroupBox(tr('Seitengrösse anpassen'))
+        # Seitengrösse (optional, einklappbar)
+        grp2 = QGroupBox(tr('Seitengrösse überschreiben'))
         grp2.setCheckable(True); grp2.setChecked(False)
         self._grp_page = grp2
         v2 = QVBoxLayout(grp2); v2.setSpacing(4)
@@ -337,8 +337,10 @@ class FaltmarkenDialog(QDialog):
 
 class TemplateDialog(QDialog):
     """
-    Vorlagendatei · Layoutname · Seitengrösse · Plankopf-Position ·
+    Vorlagendatei · Layoutname · Seitengrösse (optional) · Plankopf-Position ·
     Faltmarken-Parameter – alles in einem Formular.
+    Seitengrösse ist einklappbar (Checkbox-GroupBox, Standard: eingeklappt).
+    'Bestehende Faltmarken löschen' entfällt – neues Layout hat keine.
     """
 
     ANCHORS = ['oben links', 'oben rechts', 'unten links', 'unten rechts']
@@ -389,10 +391,16 @@ class TemplateDialog(QDialog):
         f2.addRow(tr('Plankopf-Position:'), self.combo_anchor)
         root.addWidget(grp2)
 
-        # Seitengrösse
-        grp3 = QGroupBox(tr('Seitengrösse'))
+        # Seitengrösse (einklappbar, Standard: eingeklappt)
+        grp3 = QGroupBox(tr('Seitengrösse überschreiben'))
+        grp3.setCheckable(True)
+        grp3.setChecked(False)   # eingeklappt = Vorlage-Format wird verwendet
+        self._grp_page = grp3
         v3 = QVBoxLayout(grp3); v3.setSpacing(4)
-        note = QLabel(tr('Überschreibt das Format der Vorlage.'))
+        note = QLabel(tr(
+            'Wenn aktiv, wird das Seitenformat der Vorlage überschrieben.\n'
+            'Wenn inaktiv, wird das Format der .qpt-Datei verwendet.'
+        ))
         note.setObjectName('desc'); note.setWordWrap(True)
         v3.addWidget(note)
         self.page_size_w = PageSizeWidget('A3', True)
@@ -407,6 +415,7 @@ class TemplateDialog(QDialog):
         self.combo_origin = QComboBox()
         self.combo_origin.addItems([tr(l) for l in ORIGIN_LABELS])
         self.combo_origin.setCurrentIndex(0)
+        self.combo_origin.setToolTip(tr('Von welcher Ecke aus werden die A4-Abstände gezählt?'))
         f4.addRow(tr('Ursprung (Plankopf):'), self.combo_origin)
 
         self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
@@ -417,10 +426,6 @@ class TemplateDialog(QDialog):
         self.spin_w.setToolTip(tr('Strichstärke in mm'))
         f4.addRow(tr('Strichstärke:'), self.spin_w)
 
-        self.chk_remove = QCheckBox(tr('Bestehende Faltmarken (fm_*) vorher löschen'))
-        self.chk_remove.setChecked(True)
-        f4.addRow('', self.chk_remove)
-
         root.addWidget(grp4)
 
         # Rahmen
@@ -430,6 +435,7 @@ class TemplateDialog(QDialog):
         f5 = QFormLayout(grp5)
         f5.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f5.setSpacing(8)
         self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
+        self.spin_border.setToolTip(tr('Strichstärke des Rahmens in mm'))
         f5.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
         root.addWidget(grp5)
 
@@ -451,17 +457,21 @@ class TemplateDialog(QDialog):
             bool(self.edit_name.text().strip()))
 
     def get_values(self):
-        w, h = self.page_size_w.get_size_mm()
+        override_size = self._grp_page.isChecked()
+        if override_size:
+            w, h = self.page_size_w.get_size_mm()
+        else:
+            w, h = None, None   # Skript liest dann Grösse aus der Vorlage
         return {
-            'template_path': self.edit_path.text().strip(),
-            'layout_name':   self.edit_name.text().strip(),
-            'anchor':        self.combo_anchor.currentText(),
-            'page_width':    w,
-            'page_height':   h,
-            'origin_index':  self.combo_origin.currentIndex(),
-            'mark_len':      self.spin_len.value(),
-            'line_width':    self.spin_w.value(),
-            'remove_old':    self.chk_remove.isChecked(),
-            'add_border':    self._grp_border.isChecked(),
-            'border_width':  self.spin_border.value(),
+            'template_path':  self.edit_path.text().strip(),
+            'layout_name':    self.edit_name.text().strip(),
+            'anchor':         self.combo_anchor.currentText(),
+            'override_size':  override_size,
+            'page_width':     w,
+            'page_height':    h,
+            'origin_index':   self.combo_origin.currentIndex(),
+            'mark_len':       self.spin_len.value(),
+            'line_width':     self.spin_w.value(),
+            'add_border':     self._grp_border.isChecked(),
+            'border_width':   self.spin_border.value(),
         }
