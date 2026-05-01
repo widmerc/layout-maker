@@ -427,16 +427,6 @@ class TemplateDialog(QDialog):
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  MapExtentDialog  –  Plan aus Kartenausschnitt erstellen
-#
-#  Workflow:
-#    1. Dialog öffnet sich nicht-modal (show), damit der Nutzer das
-#       QGIS-Hauptfenster bedienen kann.
-#    2. «Ausschnitt aufziehen»-Button versteckt den Dialog, aktiviert
-#       den RectangleMapTool auf dem Canvas.
-#    3. Nach dem Aufziehen wird der Dialog wieder sichtbar und die
-#       Felder werden befüllt.
-#    4. Nutzer kann Ausschnitt manuell nachkorrigieren.
-#    5. OK erstellt den Plan.
 # ─────────────────────────────────────────────────────────────────────────────
 
 class MapExtentDialog(QDialog):
@@ -455,7 +445,6 @@ class MapExtentDialog(QDialog):
         self.setWindowTitle(tr('Plan aus Kartenausschnitt erstellen'))
         self.setMinimumWidth(500)
         self.setStyleSheet(_STYLE)
-        # Nicht-modal + immer im Vordergrund bleiben, aber Hauptfenster bedienbar
         self.setWindowFlags(
             Qt.WindowType.Window |
             Qt.WindowType.WindowCloseButtonHint |
@@ -477,7 +466,6 @@ class MapExtentDialog(QDialog):
         grp_ext = QGroupBox(tr('Kartenausschnitt (Extent)'))
         v_ext = QVBoxLayout(grp_ext); v_ext.setSpacing(8)
 
-        # Aufzieh-Button  –  versteckt den Dialog und aktiviert Map-Tool
         self.btn_draw = QPushButton(tr('⤵  Ausschnitt auf Karte aufziehen'))
         self.btn_draw.setStyleSheet(_BTN_DRAW)
         self.btn_draw.setToolTip(tr(
@@ -488,7 +476,6 @@ class MapExtentDialog(QDialog):
         self.btn_draw.clicked.connect(self._start_draw)
         v_ext.addWidget(self.btn_draw)
 
-        # Koordinatenfelder
         f_ext = QFormLayout(); f_ext.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         f_ext.setSpacing(6)
 
@@ -613,21 +600,19 @@ class MapExtentDialog(QDialog):
 
     def _start_draw(self):
         """Dialog minimieren, Map-Tool aktivieren."""
-        from .extent_tool import RectangleMapTool
+        from .extent_tool import ExtentMapTool          # <-- fix: war RectangleMapTool
         canvas = self.iface.mapCanvas()
         self._prev_tool = canvas.mapTool()
-        self._map_tool  = RectangleMapTool(canvas)
+        self._map_tool  = ExtentMapTool(canvas)
         self._map_tool.extent_selected.connect(self._on_extent_selected)
         self._map_tool.cancelled.connect(self._on_draw_cancelled)
-        self.hide()   # Dialog ausblenden – Hauptfenster ist jetzt frei
+        self.hide()
         canvas.setMapTool(self._map_tool)
-        # Statuszeilenmeldung
         self.iface.mainWindow().statusBar().showMessage(
             tr('Ausschnitt aufziehen: Linksklick + Ziehen. ESC = Abbruch.'), 0
         )
 
     def _on_extent_selected(self, rect):
-        """Wird aufgerufen nachdem der Nutzer das Rechteck aufgezogen hat."""
         self.iface.mainWindow().statusBar().clearMessage()
         self._restore_tool()
         for sb in (self.spin_xmin, self.spin_xmax, self.spin_ymin, self.spin_ymax):
