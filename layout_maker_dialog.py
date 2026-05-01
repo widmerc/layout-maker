@@ -124,11 +124,11 @@ class LayoutMakerDialog(QDialog):
         # ── Karte 1 ───────────────────────────────────────────────────
         card1 = QFrame(); card1.setObjectName('card')
         c1 = QVBoxLayout(card1); c1.setSpacing(6); c1.setContentsMargins(14, 12, 14, 12)
-        lbl1 = QLabel('① Faltmarken hinzufügen')
+        lbl1 = QLabel('\u2460 Faltmarken hinzuf\u00fcgen')
         lbl1.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
         desc1 = QLabel('Setzt Faltmarken im A4-Raster auf ein bestehendes Print-Layout.\nDas Layout muss bereits im Projekt vorhanden sein.')
         desc1.setObjectName('desc'); desc1.setWordWrap(True)
-        btn1 = QPushButton('  Faltmarken setzen …'); btn1.setStyleSheet(_BTN_PRIMARY)
+        btn1 = QPushButton('  Faltmarken setzen \u2026'); btn1.setStyleSheet(_BTN_PRIMARY)
         btn1.clicked.connect(self._run_faltmarken)
         c1.addWidget(lbl1); c1.addWidget(desc1); c1.addSpacing(4); c1.addWidget(btn1)
         root.addWidget(card1)
@@ -136,11 +136,11 @@ class LayoutMakerDialog(QDialog):
         # ── Karte 2 ───────────────────────────────────────────────────
         card2 = QFrame(); card2.setObjectName('card')
         c2 = QVBoxLayout(card2); c2.setSpacing(6); c2.setContentsMargins(14, 12, 14, 12)
-        lbl2 = QLabel('② Layout aus Vorlage erstellen')
+        lbl2 = QLabel('\u2461 Layout aus Vorlage erstellen')
         lbl2.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
-        desc2 = QLabel('Importiert eine .qpt-Vorlagendatei, positioniert den Plankopf\nund fügt automatisch Faltmarken hinzu.')
+        desc2 = QLabel('Importiert eine .qpt-Vorlagendatei, positioniert den Plankopf\nund f\u00fcgt automatisch Faltmarken hinzu.')
         desc2.setObjectName('desc'); desc2.setWordWrap(True)
-        btn2 = QPushButton('  Layout aus Vorlage erstellen …'); btn2.setStyleSheet(_BTN_SECONDARY)
+        btn2 = QPushButton('  Layout aus Vorlage erstellen \u2026'); btn2.setStyleSheet(_BTN_SECONDARY)
         btn2.clicked.connect(self._run_template)
         c2.addWidget(lbl2); c2.addWidget(desc2); c2.addSpacing(4); c2.addWidget(btn2)
         root.addWidget(card2)
@@ -148,14 +148,14 @@ class LayoutMakerDialog(QDialog):
         # ── Karte 3 ───────────────────────────────────────────────────
         card3 = QFrame(); card3.setObjectName('card')
         c3 = QVBoxLayout(card3); c3.setSpacing(6); c3.setContentsMargins(14, 12, 14, 12)
-        lbl3 = QLabel('③ Plan aus Kartenausschnitt erstellen')
+        lbl3 = QLabel('\u2462 Plan aus Kartenausschnitt erstellen')
         lbl3.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
         desc3 = QLabel(
-            'Ausschnitt auf der Karte aufziehen, Massstab eingeben –\n'
-            'Plangrösse wird berechnet und Plan direkt erstellt.'
+            'Ausschnitt auf der Karte aufziehen, Massstab eingeben \u2013\n'
+            'Plangr\u00f6sse wird berechnet und Plan direkt erstellt.'
         )
         desc3.setObjectName('desc'); desc3.setWordWrap(True)
-        btn3 = QPushButton('  Plan aus Kartenausschnitt …'); btn3.setStyleSheet(_BTN_TERTIARY)
+        btn3 = QPushButton('  Plan aus Kartenausschnitt \u2026'); btn3.setStyleSheet(_BTN_TERTIARY)
         btn3.clicked.connect(self._run_from_extent)
         c3.addWidget(lbl3); c3.addWidget(desc3); c3.addSpacing(4); c3.addWidget(btn3)
         root.addWidget(card3)
