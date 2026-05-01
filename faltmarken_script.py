@@ -4,6 +4,10 @@ faltmarken_script.py  –  kompatibel mit QGIS 3 (PyQt5) und QGIS 4 (PyQt6)
 
 Strichstärke wird korrekt in mm gesetzt via QgsSimpleLineSymbolLayer,
 da QPen.setWidthF() Qt-Pixel (nicht mm) verwendet.
+
+Hinweis: Der «Ursprung»-Parameter wurde entfernt. Der Ursprung ergibt sich
+immer automatisch aus der Plankopf-Position (anchor), die dem draw_faltmarken-
+Aufruf übergeben wird.
 """
 
 from qgis.PyQt.QtCore import QCoreApplication, QPointF
@@ -32,14 +36,21 @@ def tr(msg):
     return QCoreApplication.translate('FaltmarkenScript', msg)
 
 
-# ── Ursprünge: (Label, from_right, from_bottom) ──────────────────────────────
-_ORIGINS = [
-    ('Oben links',   False, False),
-    ('Oben rechts',  True,  False),
-    ('Unten links',  False, True),
-    ('Unten rechts', True,  True),
-]
-ORIGIN_LABELS = [o[0] for o in _ORIGINS]
+# ── Anker → (from_right, from_bottom) ────────────────────────────────────────
+# Der Ursprung der Faltmarken wird immer aus der Plankopf-Position abgeleitet:
+# Plankopf unten rechts  → Faltmarken-Ursprung unten rechts
+# Plankopf oben links    → Faltmarken-Ursprung oben links  ... usw.
+
+_ANCHOR_TO_ORIGIN = {
+    'oben links':   (False, False),
+    'oben rechts':  (True,  False),
+    'unten links':  (False, True),
+    'unten rechts': (True,  True),
+}
+
+# Rückwärtskompatibilität: ORIGIN_LABELS wird nicht mehr im Dialog verwendet,
+# bleibt aber als leere Liste erhalten damit alte Importe nicht brechen.
+ORIGIN_LABELS = []
 
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
@@ -57,10 +68,6 @@ def _frange(start, stop, step):
 
 
 def _make_symbol(width_mm, color=QColor(0, 0, 0)):
-    """
-    Erstellt einen QgsLineSymbol mit Strichstärke in mm.
-    QPen.setWidthF() arbeitet in Qt-Pixeln – deshalb QgsSimpleLineSymbolLayer.
-    """
     sl = QgsSimpleLineSymbolLayer(color)
     sl.setWidth(width_mm)
     sl.setWidthUnit(_SMM)
@@ -81,7 +88,6 @@ def _line(layout, symbol, x0, y0, x1, y1, item_id):
 
 
 def _close_layout_designer(layout):
-    """Schliesst den Layout-Designer falls er für dieses Layout offen ist."""
     try:
         from qgis.utils import iface
         for designer in iface.openLayoutDesigners():
@@ -94,7 +100,6 @@ def _close_layout_designer(layout):
 
 
 def _remove_fm_items(layout):
-    """Entfernt alle Items mit Prefix fm_. Schliesst vorher den Designer."""
     _close_layout_designer(layout)
     to_remove = [
         item for item in layout.items()
@@ -115,7 +120,7 @@ def draw_faltmarken(
     layout,
     mark_len=6.0,
     line_width=0.25,
-    origin_index=0,
+    anchor='unten rechts',
     remove_old=True,
     add_border=True,
     border_width=0.5,
@@ -128,22 +133,23 @@ def draw_faltmarken(
     layout       : QgsPrintLayout
     mark_len     : Länge jeder Marke in mm
     line_width   : Strichstärke Faltmarken in mm
-    origin_index : 0=oben links, 1=oben rechts, 2=unten links, 3=unten rechts
+    anchor       : Plankopf-Position – 'oben links' | 'oben rechts' |
+                   'unten links' | 'unten rechts'  (bestimmt den Ursprung)
     remove_old   : Bestehende fm_*-Items vorher löschen
     add_border   : Rahmen um das Layout zeichnen
     border_width : Strichstärke Rahmen in mm
     """
-    page    = layout.pageCollection().page(0)
-    W       = page.pageSize().width()
-    H       = page.pageSize().height()
-    _, r, b = _ORIGINS[origin_index]
+    page = layout.pageCollection().page(0)
+    W    = page.pageSize().width()
+    H    = page.pageSize().height()
+    r, b = _ANCHOR_TO_ORIGIN.get(anchor, (True, True))
 
     if remove_old:
         _remove_fm_items(layout)
 
-    sym    = _make_symbol(line_width)
-    xs     = list(_frange(W, 0.0, -210.0) if r else _frange(0.0, W, 210.0))
-    ys     = list(_frange(H, 0.0, -297.0) if b else _frange(0.0, H, 297.0))
+    sym = _make_symbol(line_width)
+    xs  = list(_frange(W, 0.0, -210.0) if r else _frange(0.0, W, 210.0))
+    ys  = list(_frange(H, 0.0, -297.0) if b else _frange(0.0, H, 297.0))
 
     for i, x in enumerate(xs):
         _line(layout, sym, x, 0,          x, mark_len,  f'fm_vt_{i}')
@@ -154,7 +160,7 @@ def draw_faltmarken(
         _line(layout, sym, W-mark_len, y, W,        y,  f'fm_hr_{j}')
 
     if add_border:
-        bw  = border_width if border_width > 0 else 0.5
+        bw   = border_width if border_width > 0 else 0.5
         bsym = _make_symbol(bw)
         _line(layout, bsym, 0, 0, W, 0,  'fm_border_t')
         _line(layout, bsym, W, 0, W, H,  'fm_border_r')
@@ -188,11 +194,12 @@ def add_a4_raster_faltmarken(iface, parent=None):
     if vals['change_size']:
         _set_page_size(layout, vals['page_width'], vals['page_height'])
 
+    # Anchor aus Layout-Items ableiten falls möglich (Fallback: unten rechts)
     draw_faltmarken(
         layout,
         mark_len     = vals['mark_len'],
         line_width   = vals['line_width'],
-        origin_index = vals['origin_index'],
+        anchor       = 'unten rechts',
         remove_old   = vals['remove_old'],
         add_border   = vals['add_border'],
         border_width = vals['border_width'],

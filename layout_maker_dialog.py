@@ -11,7 +11,7 @@ from qgis.PyQt.QtWidgets import (
     QPushButton, QVBoxLayout,
 )
 from .faltmarken_script import add_a4_raster_faltmarken
-from .layout_template_script import create_layout_from_template
+from .layout_template_script import create_layout_from_template, create_layout_from_extent
 
 
 _MAIN_STYLE = """
@@ -63,12 +63,22 @@ _BTN_SECONDARY = (
     "QPushButton:pressed{ background-color: #c9e4e8; }"
 )
 
+_BTN_TERTIARY = (
+    "QPushButton {"
+    "  background-color: #f0f7f9; color: #2c5f6e;"
+    "  border: 1px solid #a8cdd4; border-radius: 6px;"
+    "  padding: 10px 20px; font-size: 10pt; font-weight: bold; min-height: 36px;"
+    "}"
+    "QPushButton:hover  { background-color: #d8eef2; border-color: #2c5f6e; }"
+    "QPushButton:pressed{ background-color: #c9e4e8; }"
+)
+
 
 def _make_divider():
     line = QFrame()
     line.setObjectName('divider')
-    line.setFrameShape(QFrame.Shape.HLine)      # PyQt6-kompatibel
-    line.setFrameShadow(QFrame.Shadow.Sunken)   # PyQt6-kompatibel
+    line.setFrameShape(QFrame.Shape.HLine)
+    line.setFrameShadow(QFrame.Shadow.Sunken)
     return line
 
 
@@ -97,8 +107,8 @@ class LayoutMakerDialog(QDialog):
             logo_lbl = QLabel()
             px = QPixmap(self.icon_path).scaled(
                 48, 48,
-                Qt.AspectRatioMode.KeepAspectRatio,       # PyQt6
-                Qt.TransformationMode.SmoothTransformation # PyQt6
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
             )
             logo_lbl.setPixmap(px)
             logo_lbl.setFixedSize(52, 52)
@@ -171,6 +181,33 @@ class LayoutMakerDialog(QDialog):
         c2.addWidget(btn2)
         root.addWidget(card2)
 
+        # ── Karte 3: Plan aus Kartenausschnitt ─────────────────────────────
+        card3 = QFrame()
+        card3.setObjectName('card')
+        c3 = QVBoxLayout(card3)
+        c3.setSpacing(6)
+        c3.setContentsMargins(14, 12, 14, 12)
+
+        lbl3 = QLabel('③ Plan aus Kartenausschnitt erstellen')
+        lbl3.setStyleSheet('font-weight: bold; font-size: 10pt; color: #2c5f6e;')
+
+        desc3 = QLabel(
+            'Übernimmt den aktuellen Ausschnitt aus dem Hauptfenster, berechnet\n'
+            'die Plangrösse aus Massstab und Extent und erstellt direkt einen Plan.'
+        )
+        desc3.setObjectName('desc')
+        desc3.setWordWrap(True)
+
+        btn3 = QPushButton('  Plan aus Kartenausschnitt …')
+        btn3.setStyleSheet(_BTN_TERTIARY)
+        btn3.clicked.connect(self._run_from_extent)
+
+        c3.addWidget(lbl3)
+        c3.addWidget(desc3)
+        c3.addSpacing(4)
+        c3.addWidget(btn3)
+        root.addWidget(card3)
+
         root.addStretch()
 
     def _run_faltmarken(self):
@@ -178,3 +215,6 @@ class LayoutMakerDialog(QDialog):
 
     def _run_template(self):
         create_layout_from_template(self.iface, self)
+
+    def _run_from_extent(self):
+        create_layout_from_extent(self.iface, self)
