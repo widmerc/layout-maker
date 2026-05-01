@@ -50,8 +50,12 @@ def create_layout_from_template(iface, parent=None):
     anchor        = vals['anchor']
     page_w        = vals['page_width']
     page_h        = vals['page_height']
+    origin_index  = vals['origin_index']
     mark_len      = vals['mark_len']
     line_width    = vals['line_width']
+    remove_old    = vals['remove_old']
+    add_border    = vals['add_border']
+    border_width  = vals['border_width']
 
     project = QgsProject.instance()
     manager = project.layoutManager()
@@ -86,12 +90,20 @@ def create_layout_from_template(iface, parent=None):
     # 1. Seitengroesse setzen (VOR dem Verschieben der Elemente)
     _set_page_size(layout, page_w, page_h)
 
-    # 2. Plankopf an gewaaehlte Ecke verschieben
+    # 2. Plankopf an gewaehlte Ecke verschieben
     tpl_w, tpl_h = _template_bounds(items)
     _move_items(items, page_w, page_h, tpl_w, tpl_h, anchor)
 
-    # 3. Faltmarken – kein Offset, Raster startet immer bei (0, 0)
-    draw_faltmarken(layout, mark_len, line_width)
+    # 3. Faltmarken mit allen neuen Parametern
+    draw_faltmarken(
+        layout,
+        mark_len     = mark_len,
+        line_width   = line_width,
+        origin_index = origin_index,
+        remove_old   = remove_old,
+        add_border   = add_border,
+        border_width = border_width,
+    )
 
     manager.addLayout(layout)
     iface.openLayoutDesigner(layout)
