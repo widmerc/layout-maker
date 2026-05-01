@@ -1,156 +1,144 @@
-# Layout Maker — QGIS 4 Plugin
+# Layout Maker — QGIS Plugin
 
-> Kartenlayouts auf Knopfdruck — professionell, einheitlich, druckfertig.
+> Professional, consistent, print-ready map layouts at the click of a button.
 
-![QGIS Version](https://img.shields.io/badge/QGIS-4.x-green)
+![QGIS Version](https://img.shields.io/badge/QGIS-3.x%20%7C%204.x-green)
+![Qt](https://img.shields.io/badge/Qt-5%20%7C%206-blue)
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![License](https://img.shields.io/badge/License-GPL--2.0-orange)
 
 ---
 
-## Was macht dieses Plugin?
+## What it does
 
-**Layout Maker** nimmt dir die mühsame Handarbeit beim Erstellen von Drucklayouts ab. Statt jedes Mal von Null anzufangen — Kartenrahmen ziehen, Logo einfügen, Faltmarken setzen, Massstab anpassen — erledigt das Plugin all das automatisch. Du öffnest den Dialog, wählst deine Einstellungen, klickst auf **Start** — und bekommst ein druckfertiges A4-Layout direkt im QGIS Layout-Manager.
+**Layout Maker** automates the creation of print-ready map layouts. Instead of manually drawing map frames, inserting logos, placing fold marks, and adjusting scales every time — the plugin handles it all. Open the dialog, choose your settings, click **Start**, and get a finished layout directly in the QGIS Layout Manager.
 
-Ideal für GIS-Fachleute, die täglich oder wöchentlich Karten für Kunden, Berichte oder interne Ablage erstellen müssen.
-
----
-
-## Was kann das Plugin heute?
-
-- **Automatisches A4-Layout** — Mit einem Klick wird ein vollständiges Drucklayout aus deiner aktuellen Kartenansicht erstellt
-- **Faltmarken (Faltmarken)** — Präzise Faltmarkierungen werden automatisch gesetzt, die Strichstärke ist einstellbar
-- **Eigenes Logo** — Dein Logo (`icons/logo.png`) wird automatisch ins Layout eingebettet
-- **Kartenausschnitt wählen** — Mit dem integrierten Ausschnitt-Werkzeug kannst du den Kartenbereich interaktiv auf dem Canvas festlegen
-- **Mehrsprachigkeit** — Die Benutzeroberfläche ist übersetzbar (Deutsch, Englisch und weitere Sprachen via `i18n/`)
-- **Papierformate** — A0 bis A5 sowie benutzerdefinierte Grössen werden unterstützt
-- **Hoch- und Querformat** — Ausrichtung frei wählbar
-- **Einfaches UI** — Klarer Qt6-Dialog ohne unnötige Komplexität
+Perfect for GIS professionals who regularly produce maps for clients, reports, or internal documentation.
 
 ---
 
-## So wird das Plugin installiert
+## Features
 
-### Empfehlung: Über den QGIS Plugin-Manager
-
-1. QGIS 4 öffnen
-2. **Plugins → Erweiterungen verwalten und installieren**
-3. Nach **Layout Maker** suchen
-4. Auf **Installieren** klicken — fertig
-
-### Manuell als ZIP
-
-1. Neueste Version als ZIP von der [Releases-Seite](https://github.com/widmerc/layout-maker/releases) herunterladen
-2. In QGIS: **Plugins → Erweiterungen verwalten und installieren → Aus ZIP installieren**
-3. ZIP-Datei auswählen und installieren
+- **One-click A4 layout** from your current map view
+- **Fold marks (Faltmarken)** with configurable line width
+- **Custom logo** embedding (`icons/logo.png`)
+- **Interactive extent tool** to select the map area on the canvas
+- **Multi-language UI** (English, German, and more via `i18n/`)
+- **Paper formats** A0–A5 and custom sizes
+- **Portrait & landscape** orientation
+- **Qt5 & Qt6 compatible** — works in both QGIS 3.x and QGIS 4.x
 
 ---
 
-## So wird das Plugin verwendet
+## Installation
 
-1. Ein QGIS 4-Projekt mit mindestens einem Layer öffnen
-2. **Plugins → Layout Maker** anklicken oder das Symbol in der Werkzeugleiste verwenden
-3. Im Dialog die gewünschten Einstellungen vornehmen:
-   - Kartenausschnitt mit dem Ausschnitt-Werkzeug interaktiv auf der Karte festlegen
-   - Papierformat und Ausrichtung wählen
-   - Faltmarkenstärke anpassen
-4. Auf **Start** klicken
-5. Das Layout öffnet sich im QGIS-Layoutmanager — bereit zum Export als PDF oder Bild
+**Via Plugin Manager (recommended):**
+1. Open QGIS 3.x or 4.x
+2. Go to **Plugins → Manage and Install Plugins**
+3. Search for **Layout Maker** and click **Install**
 
-**Systemvoraussetzungen:** QGIS 4.0 oder neuer (Qt6), Windows / macOS / Linux. Keine zusätzlichen Python-Pakete nötig.
+**Manually from ZIP:**
+1. Download the latest release from the [Releases page](https://github.com/widmerc/layout-maker/releases)
+2. In QGIS: **Plugins → Manage and Install Plugins → Install from ZIP**
 
----
-
-## Was wir als nächstes einbauen wollen
-
-Diese Ideen stammen aus der Analyse ähnlicher Plugins ([AutoLayoutTool](https://plugins.qgis.org/plugins/AutoLayoutTool/), [Quick Print Layout Creator](https://plugins.qgis.org/plugins/quickprintlayoutcreator/), [Maps Printer](https://gisplugins.com/plugins/mapsprinter/), [Layout Panel](https://plugins.qgis.org/plugins/layout_panel-main/), [Exportar Layouts a PDF](https://plugins.qgis.org/plugins/exportar_layouts/)) sowie aus Kundenfeedback.
-
-### Vorlagen & Templates
-
-- **Layout-Vorlagen speichern und laden** — Einmal konfigurierten Stil (Logo-Position, Faltmarken, Massstabsbalken) als Vorlage speichern und bei jedem neuen Projekt wieder laden; ähnlich wie beim Quick Print Layout Creator
-- **Mehrere Vorlagen verwalten** — z. B. «Kundenpräsentation», «Interner Bericht», «Feldeinsatz»
-- **Unternehmens-CI direkt im Plugin** — Farben, Schriften und Logo-Pfad einmalig hinterlegen, nicht pro Layout neu setzen
-
-### Karten-Elemente
-
-- **Automatischer Massstabsbalken** — wird proportional zur Kartengrösse gesetzt (wie AutoLayoutTool)
-- **Nordpfeil** — frei positionierbar, aus einer Auswahl an Stilen
-- **Automatische Legende** — nur sichtbare Layer werden aufgeführt, Stil anpassbar
-- **Titelblock / Beschriftungsfeld** — Projekttitel, Datum, Bearbeiter, Massstab als ausfüllbare Felder
-
-### Export
-
-- **Direkt-Export als PDF** — ohne Umweg über den Layout-Manager, ein Klick genügt
-- **Batch-Export mehrerer Layouts** — alle vorhandenen Layouts in einem Schritt als PDF exportieren (Maps Printer / Exportar Layouts a PDF)
-- **Auflösung wählbar** — 150 / 300 / 600 dpi für verschiedene Verwendungszwecke
-- **Dateiname automatisch generieren** — z. B. `Projektname_Datum_Massstab.pdf`
-
-### Automatisierung & Atlas
-
-- **Atlas-Unterstützung** — Layout automatisch für jeden Feature einer Vektorebene generieren (z. B. eine Karte pro Gemeinde oder Parzelle); inspiriert von QGIS Atlas und Quick Print Layout Creator
-- **Mehrere Layer gleichzeitig** — Pro Layer ein eigenes Layout erstellen und alle auf einmal exportieren
-
-### Benutzeroberfläche
-
-- **Vorschau im Dialog** — Miniaturvorschau des Layouts direkt im Einstellungsdialog
-- **Layout-Panel im Hauptfenster** — Schneller Zugriff auf alle Layouts ohne den Layout-Manager zu öffnen (wie Layout Panel Plugin)
-- **Zuletzt verwendete Einstellungen merken** — Dialog öffnet mit den letzten gewählten Werten
+**Requirements:** QGIS 3.16+ or QGIS 4.0+, Windows / macOS / Linux. No additional Python packages needed.
 
 ---
 
-## Feature-Requests: Was sich unsere Kunden wünschen könnten
+## Usage
 
-Die folgenden Ideen sind noch nicht geplant, aber naheliegende Anfragen aus der Praxis. Wer diese Funktion braucht, kann gerne ein [Issue auf GitHub](https://github.com/widmerc/layout-maker/issues) eröffnen.
-
-- **QR-Code im Layout** — Link zum Projekt oder zu Online-Karte direkt ins Drucklayout einbetten
-- **Koordinatengitter / Graticule** — optionales Gitternetz mit Koordinatenbeschriftung für technische Karten
-- **Mehrere Kartenrahmen** — z. B. Übersichtskarte + Detailkarte auf demselben Blatt
-- **Stempelfeld mit digitaler Signatur** — für Planungsdokumente, die einen Visumsstempel benötigen
-- **Druckserien nach Attribut** — Karten automatisch für alle Werte eines bestimmten Attributfeldes (z. B. alle Kantone, alle Bauprojekte) erzeugen
-- **Export in andere Formate** — GeoPDF (mit eingebetteten Layern), SVG, georeferenziertes TIFF
-- **Beschriftung dynamisch aus Layerattributen** — Kartentitel und Metadaten werden automatisch aus den Attributen des gewählten Features befüllt
-- **Integrierter Plausibilitätscheck** — Warnung wenn Layer ausgeblendet, CRS nicht übereinstimmt oder Kartenausschnitt leer ist
-
----
-
-## Bekannte Einschränkungen
-
-- Erfordert QGIS 4.0+ (Qt6). Nicht kompatibel mit QGIS 3.x (Qt5).
-- Derzeit kein automatisierter Test-Suite; manuelle Tests in QGIS 4.
+1. Open a QGIS project with at least one layer
+2. Click **Plugins → Layout Maker** or use the toolbar icon
+3. Configure your settings: extent, paper size, orientation, fold mark width
+4. Click **Start**
+5. The layout opens in the QGIS Layout Manager — ready to export as PDF or image
 
 ---
 
 ## Changelog
 
+### v0.3.0
+- **QGIS 3.x support** — tested and compatible with QGIS 3.16+
+- **Qt5 & Qt6 dual support** — runs on both QGIS 3 (Qt5) and QGIS 4 (Qt6)
+- `metadata.txt` updated with `supportsQt6=True` and correct version range
+
 ### v0.2.0
-- Faltmarken mit konfigurierbarer Strichstärke
-- Mehrsprachigkeit (i18n)
-- Logo-Einbettung
-- UI-Überarbeitung und Qt6-Kompatibilität
-- Mehrere Papierformate (A0–A5 und benutzerdefiniert)
+- Fold marks with configurable line width
+- Multi-language support (i18n)
+- Logo embedding
+- UI rework and Qt6 compatibility
+- Multiple paper formats (A0–A5 and custom)
 
 ### v0.1.0
-- Erste Version: A4-Layout-Generierung mit UI-Dialog
+- Initial release: A4 layout generation with UI dialog
 
 ---
 
-## Mitmachen
+## Planned & Ideas
 
-Pull Requests sind willkommen. Bitte:
-- Code einfach und lesbar halten — keine unnötigen Abhängigkeiten
-- Änderungen mit QGIS 4.x testen
-- Bei grösseren Änderungen zuerst ein [Issue](https://github.com/widmerc/layout-maker/issues) eröffnen
+Things that could go into future versions — open an [issue](https://github.com/widmerc/layout-maker/issues) if you want to see something prioritised.
+
+**Templates & Styles**
+- Save and load layout templates (logo position, fold marks, scale bar style)
+- Manage multiple templates (e.g. "Client Presentation", "Internal Report", "Field Use")
+- Store company CI (colors, fonts, logo path) once, reuse everywhere
+
+**Map Elements**
+- Auto scale bar proportional to map size
+- North arrow (selectable style, free positioning)
+- Auto legend showing only visible layers
+- Title block with project name, date, author, scale as fillable fields
+
+**Export**
+- One-click PDF export without opening the Layout Manager
+- Batch export of all layouts to PDF
+- Selectable DPI (150 / 300 / 600)
+- Auto-generated filenames (e.g. `ProjectName_Date_Scale.pdf`)
+
+**Atlas & Automation**
+- Atlas support — generate one layout per feature (e.g. one map per municipality)
+- Multi-layer export — one layout per layer, exported in one step
+
+**UI**
+- Live preview in the dialog
+- Layout panel docked in the main QGIS window
+- Remember last used settings
+
+**Further ideas**
+- QR code in the layout (link to project or online map)
+- Coordinate grid / graticule with labels
+- Multiple map frames (overview map + detail map on one sheet)
+- Stamp field with digital signature for planning documents
+- Print series by attribute (e.g. all municipalities, all building projects)
+- Export to GeoPDF (with embedded layers), SVG, georeferenced TIFF
+- Dynamic labels from layer attributes (title and metadata filled from feature attributes)
+- Built-in sanity check — warn if layers are hidden, CRS mismatch, or extent is empty
+- Dark mode UI support
+- Drag-and-drop element positioning in dialog preview
+- WMS/WCS background layer support in layout
+- Paper roll formats for large-format plotters
+- Watermark / draft stamp overlay
+- Automatic CRS labelling in the layout
+- Support for multi-page layouts (e.g. title page + map pages)
 
 ---
 
-## Autor
+## Contributing
 
-**Claude Widmer**  
-Geograph & GIS-Enthusiast, Universität Zürich  
+Pull requests are welcome. Please:
+- Keep the code simple and readable — no unnecessary dependencies
+- Test changes with QGIS 3.x and 4.x
+- Open an [issue](https://github.com/widmerc/layout-maker/issues) first for larger changes
+
+---
+
+## Author
+
+**Claude Widmer** — Geographer & GIS enthusiast, University of Zurich  
 GitHub: [@widmerc](https://github.com/widmerc)
 
 ---
 
-## Lizenz
+## License
 
-Dieses Plugin ist freie Software unter der [GNU General Public License v2 oder später](https://www.gnu.org/licenses/gpl-2.0.html).
+Free software under the [GNU General Public License v2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
