@@ -2,29 +2,30 @@
 """
 faltmarken_script.py  –  kompatibel mit QGIS 3 (PyQt5) und QGIS 4 (PyQt6)
 
-Integriert den AddA4RasterFaltmarken-Algorithmus direkt als Funktion:
-  - Wählbarer Ursprung (Plankopf-Position)
-  - Optionaler Rahmen
-  - Löscht bestehende fm_*-Items (schliesst Layout-Designer vorher)
-  - Alle Items gesperrt, Z-Value 1000
+Strichstärke wird korrekt in mm gesetzt via QgsSimpleLineSymbolLayer,
+da QPen.setWidthF() Qt-Pixel (nicht mm) verwendet.
 """
 
 from qgis.PyQt.QtCore import QCoreApplication, QPointF
-from qgis.PyQt.QtGui import QPolygonF, QColor, QPen
+from qgis.PyQt.QtGui import QPolygonF, QColor
 from qgis.PyQt.QtWidgets import QDialog, QMessageBox
 from qgis.core import (
     QgsLayoutItemPolyline,
     QgsLayoutItem,
     QgsLayoutSize,
+    QgsLineSymbol,
+    QgsSimpleLineSymbolLayer,
     QgsProject,
 )
 
 try:
     from qgis.core import QgsUnitTypes
-    _MM = QgsUnitTypes.LayoutMillimeters
+    _MM  = QgsUnitTypes.LayoutMillimeters
+    _SMM = QgsUnitTypes.RenderMillimeters
 except AttributeError:
     from qgis.core import Qgis
-    _MM = Qgis.LayoutUnit.Millimeters
+    _MM  = Qgis.LayoutUnit.Millimeters
+    _SMM = Qgis.RenderUnit.Millimeters
 
 
 def tr(msg):
@@ -55,11 +56,24 @@ def _frange(start, stop, step):
             v += step
 
 
-def _line(layout, pen, x0, y0, x1, y1, item_id):
+def _make_symbol(width_mm, color=QColor(0, 0, 0)):
+    """
+    Erstellt einen QgsLineSymbol mit Strichstärke in mm.
+    QPen.setWidthF() arbeitet in Qt-Pixeln – deshalb QgsSimpleLineSymbolLayer.
+    """
+    sl = QgsSimpleLineSymbolLayer(color)
+    sl.setWidth(width_mm)
+    sl.setWidthUnit(_SMM)
+    sym = QgsLineSymbol()
+    sym.changeSymbolLayer(0, sl)
+    return sym
+
+
+def _line(layout, symbol, x0, y0, x1, y1, item_id):
     item = QgsLayoutItemPolyline(
         QPolygonF([QPointF(x0, y0), QPointF(x1, y1)]), layout
     )
-    item.setPen(pen)
+    item.setSymbol(symbol.clone())
     item.setId(item_id)
     item.setLocked(True)
     layout.addLayoutItem(item)
@@ -107,8 +121,7 @@ def draw_faltmarken(
     border_width=0.5,
 ):
     """
-    Setzt Falt-/Schnittmarken im A4-Raster (210 mm × 297 mm) über die
-    gesamte Layoutgrösse.
+    Setzt Falt-/Schnittmarken im A4-Raster (210 mm x 297 mm).
 
     Parameters
     ----------
@@ -120,36 +133,33 @@ def draw_faltmarken(
     add_border   : Rahmen um das Layout zeichnen
     border_width : Strichstärke Rahmen in mm
     """
-    page     = layout.pageCollection().page(0)
-    W        = page.pageSize().width()
-    H        = page.pageSize().height()
-    _, r, b  = _ORIGINS[origin_index]
+    page    = layout.pageCollection().page(0)
+    W       = page.pageSize().width()
+    H       = page.pageSize().height()
+    _, r, b = _ORIGINS[origin_index]
 
     if remove_old:
         _remove_fm_items(layout)
 
-    pen = QPen(QColor(0, 0, 0))
-    pen.setWidthF(line_width)
-
-    xs = list(_frange(W, 0.0, -210.0) if r else _frange(0.0, W, 210.0))
-    ys = list(_frange(H, 0.0, -297.0) if b else _frange(0.0, H, 297.0))
+    sym    = _make_symbol(line_width)
+    xs     = list(_frange(W, 0.0, -210.0) if r else _frange(0.0, W, 210.0))
+    ys     = list(_frange(H, 0.0, -297.0) if b else _frange(0.0, H, 297.0))
 
     for i, x in enumerate(xs):
-        _line(layout, pen, x, 0,          x, mark_len,  f'fm_vt_{i}')
-        _line(layout, pen, x, H-mark_len, x, H,         f'fm_vb_{i}')
+        _line(layout, sym, x, 0,          x, mark_len,  f'fm_vt_{i}')
+        _line(layout, sym, x, H-mark_len, x, H,         f'fm_vb_{i}')
 
     for j, y in enumerate(ys):
-        _line(layout, pen, 0,          y, mark_len, y,  f'fm_hl_{j}')
-        _line(layout, pen, W-mark_len, y, W,        y,  f'fm_hr_{j}')
+        _line(layout, sym, 0,          y, mark_len, y,  f'fm_hl_{j}')
+        _line(layout, sym, W-mark_len, y, W,        y,  f'fm_hr_{j}')
 
     if add_border:
-        bw = border_width if border_width > 0 else 0.5
-        bp = QPen(QColor(0, 0, 0))
-        bp.setWidthF(bw)
-        _line(layout, bp, 0, 0, W, 0,  'fm_border_t')
-        _line(layout, bp, W, 0, W, H,  'fm_border_r')
-        _line(layout, bp, W, H, 0, H,  'fm_border_b')
-        _line(layout, bp, 0, H, 0, 0,  'fm_border_l')
+        bw  = border_width if border_width > 0 else 0.5
+        bsym = _make_symbol(bw)
+        _line(layout, bsym, 0, 0, W, 0,  'fm_border_t')
+        _line(layout, bsym, W, 0, W, H,  'fm_border_r')
+        _line(layout, bsym, W, H, 0, H,  'fm_border_b')
+        _line(layout, bsym, 0, H, 0, 0,  'fm_border_l')
 
 
 # ── Dialog-Einstiegspunkt ─────────────────────────────────────────────────────
