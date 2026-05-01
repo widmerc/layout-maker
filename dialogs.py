@@ -113,7 +113,6 @@ def _bbox(parent_dlg):
 #  PageSizeWidget – wiederverwendbare Seitenformat-Auswahl
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Format → (Breite_mm, Höhe_mm) im Hochformat
 _PAGE_SIZES = {
     'A0':                (841.0,  1189.0),
     'A1':                (594.0,   841.0),
@@ -127,7 +126,6 @@ _PAGE_SIZES = {
 class PageSizeWidget(QWidget):
     """
     Kompaktes Widget zur Seitenformat-Auswahl.
-
     Liefert get_size_mm() → (breite_mm, hoehe_mm).
     """
 
@@ -140,16 +138,13 @@ class PageSizeWidget(QWidget):
         layout.setSpacing(6)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        # Zeile 1: Format-Dropdown + Orientierung
         row1 = QHBoxLayout()
         row1.setSpacing(8)
-
         self.combo_format = QComboBox()
         self.combo_format.addItems(list(_PAGE_SIZES.keys()))
         self.combo_format.setCurrentText(def_fmt)
         self.combo_format.setMinimumWidth(140)
         row1.addWidget(self.combo_format)
-
         self.radio_portrait  = QRadioButton(tr('Hochformat'))
         self.radio_landscape = QRadioButton(tr('Querformat'))
         grp = QButtonGroup(self)
@@ -161,23 +156,13 @@ class PageSizeWidget(QWidget):
         row1.addStretch()
         layout.addLayout(row1)
 
-        # Zeile 2: Breite × Höhe
         row2 = QHBoxLayout()
         row2.setSpacing(6)
-
-        lbl_w = QLabel(tr('Breite:'))
-        lbl_w.setFixedWidth(44)
-        self.spin_w = _spinbox(0.0, 1.0, 10000.0, 1)
-        self.spin_w.setFixedWidth(90)
-
-        lbl_h = QLabel(tr('Höhe:'))
-        lbl_h.setFixedWidth(38)
-        self.spin_h = _spinbox(0.0, 1.0, 10000.0, 1)
-        self.spin_h.setFixedWidth(90)
-
-        self.lbl_info = QLabel()
-        self.lbl_info.setObjectName('info')
-
+        lbl_w = QLabel(tr('Breite:')); lbl_w.setFixedWidth(44)
+        self.spin_w = _spinbox(0.0, 1.0, 10000.0, 1); self.spin_w.setFixedWidth(90)
+        lbl_h = QLabel(tr('Höhe:'));  lbl_h.setFixedWidth(38)
+        self.spin_h = _spinbox(0.0, 1.0, 10000.0, 1); self.spin_h.setFixedWidth(90)
+        self.lbl_info = QLabel(); self.lbl_info.setObjectName('info')
         row2.addWidget(lbl_w); row2.addWidget(self.spin_w)
         row2.addSpacing(6)
         row2.addWidget(lbl_h); row2.addWidget(self.spin_h)
@@ -186,16 +171,12 @@ class PageSizeWidget(QWidget):
         row2.addStretch()
         layout.addLayout(row2)
 
-        # Signale
         self.combo_format.currentTextChanged.connect(self._on_format_changed)
         self.radio_portrait.toggled.connect(self._on_orientation_changed)
         self.radio_landscape.toggled.connect(self._on_orientation_changed)
         self.spin_w.valueChanged.connect(self._on_custom_changed)
         self.spin_h.valueChanged.connect(self._on_custom_changed)
-
-        self._on_format_changed(def_fmt)   # initialisieren
-
-    # ── interne Slots ────────────────────────────────────────────────────
+        self._on_format_changed(def_fmt)
 
     def _is_custom(self):
         return self.combo_format.currentText() == 'Benutzerdefiniert'
@@ -227,12 +208,10 @@ class PageSizeWidget(QWidget):
         w0, h0 = _PAGE_SIZES[fmt]
         if w0 is None:
             return
-        # Querformat: w > h
         if self.radio_landscape.isChecked():
             w, h = max(w0, h0), min(w0, h0)
         else:
             w, h = min(w0, h0), max(w0, h0)
-        # Signale kurz blockieren
         for sb in (self.spin_w, self.spin_h):
             sb.blockSignals(True)
         self.spin_w.setValue(w)
@@ -241,14 +220,10 @@ class PageSizeWidget(QWidget):
             sb.blockSignals(False)
         self.lbl_info.setText(f'{w:.0f} × {h:.0f} mm')
 
-    # ── öffentliche API ──────────────────────────────────────────────────
-
     def get_size_mm(self):
-        """Gibt (breite_mm, hoehe_mm) zurück."""
         return self.spin_w.value(), self.spin_h.value()
 
     def set_enabled(self, enabled: bool):
-        """Aktiviert/deaktiviert alle Kinder."""
         for child in (self.combo_format, self.radio_portrait,
                       self.radio_landscape, self.spin_w, self.spin_h):
             child.setEnabled(enabled)
@@ -260,18 +235,20 @@ class PageSizeWidget(QWidget):
 
 class FaltmarkenDialog(QDialog):
     """
-    Layout-Auswahl + optionale Seitengrössenänderung + Faltmarken-Parameter –
-    alles in einem Formular.
+    Layout-Auswahl + optionale Seitengrössenänderung + Faltmarken-Parameter
+    inkl. Ursprung, Rahmen-Option und fm_*-Löschung.
     """
 
     def __init__(self, layout_names, parent=None):
         super().__init__(parent)
         self.setWindowTitle(tr('Faltmarken hinzufügen'))
-        self.setMinimumWidth(420)
+        self.setMinimumWidth(440)
         self.setStyleSheet(_STYLE)
         self._build(layout_names)
 
     def _build(self, names):
+        from .faltmarken_script import ORIGIN_LABELS
+
         root = QVBoxLayout(self)
         root.setSpacing(12); root.setContentsMargins(16, 16, 16, 16)
 
@@ -303,13 +280,37 @@ class FaltmarkenDialog(QDialog):
         grp3 = QGroupBox(tr('Faltmarken-Parameter'))
         f3 = QFormLayout(grp3)
         f3.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f3.setSpacing(8)
-        self.spin_len = _spinbox(5.0, 0.5, 20.0, 1)
+
+        self.combo_origin = QComboBox()
+        self.combo_origin.addItems([tr(l) for l in ORIGIN_LABELS])
+        self.combo_origin.setCurrentIndex(0)
+        self.combo_origin.setToolTip(tr('Von welcher Ecke aus werden die A4-Abstände gezählt?'))
+        f3.addRow(tr('Ursprung (Plankopf):'), self.combo_origin)
+
+        self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
         self.spin_len.setToolTip(tr('Länge jeder Faltmarke in mm'))
         f3.addRow(tr('Markenlänge:'), self.spin_len)
-        self.spin_w = _spinbox(0.3, 0.05, 5.0, 2)
+
+        self.spin_w = _spinbox(0.25, 0.01, 5.0, 2)
         self.spin_w.setToolTip(tr('Strichstärke in mm'))
         f3.addRow(tr('Strichstärke:'), self.spin_w)
+
+        self.chk_remove = QCheckBox(tr('Bestehende Faltmarken (fm_*) vorher löschen'))
+        self.chk_remove.setChecked(True)
+        f3.addRow('', self.chk_remove)
+
         root.addWidget(grp3)
+
+        # Rahmen
+        grp4 = QGroupBox(tr('Rahmen'))
+        grp4.setCheckable(True); grp4.setChecked(True)
+        self._grp_border = grp4
+        f4 = QFormLayout(grp4)
+        f4.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f4.setSpacing(8)
+        self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
+        self.spin_border.setToolTip(tr('Strichstärke des Rahmens in mm'))
+        f4.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
+        root.addWidget(grp4)
 
         bb, _ = _bbox(self); root.addWidget(bb)
 
@@ -317,12 +318,16 @@ class FaltmarkenDialog(QDialog):
         change_size = self._grp_page.isChecked()
         w, h = self.page_size_w.get_size_mm() if change_size else (None, None)
         return {
-            'layout_name': self.combo.currentText(),
-            'change_size': change_size,
-            'page_width':  w,
-            'page_height': h,
-            'mark_len':    self.spin_len.value(),
-            'line_width':  self.spin_w.value(),
+            'layout_name':  self.combo.currentText(),
+            'change_size':  change_size,
+            'page_width':   w,
+            'page_height':  h,
+            'origin_index': self.combo_origin.currentIndex(),
+            'mark_len':     self.spin_len.value(),
+            'line_width':   self.spin_w.value(),
+            'remove_old':   self.chk_remove.isChecked(),
+            'add_border':   self._grp_border.isChecked(),
+            'border_width': self.spin_border.value(),
         }
 
 
@@ -346,6 +351,8 @@ class TemplateDialog(QDialog):
         self._build()
 
     def _build(self):
+        from .faltmarken_script import ORIGIN_LABELS
+
         root = QVBoxLayout(self)
         root.setSpacing(12); root.setContentsMargins(16, 16, 16, 16)
 
@@ -396,13 +403,35 @@ class TemplateDialog(QDialog):
         grp4 = QGroupBox(tr('Faltmarken-Parameter'))
         f4 = QFormLayout(grp4)
         f4.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f4.setSpacing(8)
-        self.spin_len = _spinbox(5.0, 0.5, 20.0, 1)
+
+        self.combo_origin = QComboBox()
+        self.combo_origin.addItems([tr(l) for l in ORIGIN_LABELS])
+        self.combo_origin.setCurrentIndex(0)
+        f4.addRow(tr('Ursprung (Plankopf):'), self.combo_origin)
+
+        self.spin_len = _spinbox(6.0, 0.5, 20.0, 1)
         self.spin_len.setToolTip(tr('Länge jeder Faltmarke in mm'))
         f4.addRow(tr('Markenlänge:'), self.spin_len)
-        self.spin_w = _spinbox(0.3, 0.05, 5.0, 2)
+
+        self.spin_w = _spinbox(0.25, 0.05, 5.0, 2)
         self.spin_w.setToolTip(tr('Strichstärke in mm'))
         f4.addRow(tr('Strichstärke:'), self.spin_w)
+
+        self.chk_remove = QCheckBox(tr('Bestehende Faltmarken (fm_*) vorher löschen'))
+        self.chk_remove.setChecked(True)
+        f4.addRow('', self.chk_remove)
+
         root.addWidget(grp4)
+
+        # Rahmen
+        grp5 = QGroupBox(tr('Rahmen'))
+        grp5.setCheckable(True); grp5.setChecked(True)
+        self._grp_border = grp5
+        f5 = QFormLayout(grp5)
+        f5.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f5.setSpacing(8)
+        self.spin_border = _spinbox(0.5, 0.01, 5.0, 2)
+        f5.addRow(tr('Strichstärke Rahmen:'), self.spin_border)
+        root.addWidget(grp5)
 
         bb, self._ok_btn = _bbox(self)
         self._ok_btn.setEnabled(False)
@@ -429,6 +458,10 @@ class TemplateDialog(QDialog):
             'anchor':        self.combo_anchor.currentText(),
             'page_width':    w,
             'page_height':   h,
+            'origin_index':  self.combo_origin.currentIndex(),
             'mark_len':      self.spin_len.value(),
             'line_width':    self.spin_w.value(),
+            'remove_old':    self.chk_remove.isChecked(),
+            'add_border':    self._grp_border.isChecked(),
+            'border_width':  self.spin_border.value(),
         }
