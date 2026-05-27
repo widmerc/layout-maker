@@ -239,6 +239,8 @@ class PageSizeWidget(QWidget):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class FaltmarkenDialog(QDialog):
+    ANCHORS = ['oben links', 'oben rechts', 'unten links', 'unten rechts']
+
     def __init__(self, layout_names, parent=None):
         super().__init__(parent)
         self.setWindowTitle(tr('Faltmarken hinzufügen'))
@@ -260,6 +262,15 @@ class FaltmarkenDialog(QDialog):
         self.combo = QComboBox(); self.combo.addItems(names)
         f1.addRow(tr('Layout:'), self.combo)
         root.addWidget(grp1)
+
+        grp_anchor = QGroupBox(tr('Plankopf-Position'))
+        f_anchor = QFormLayout(grp_anchor)
+        f_anchor.setLabelAlignment(Qt.AlignmentFlag.AlignRight); f_anchor.setSpacing(8)
+        self.combo_anchor = QComboBox()
+        self.combo_anchor.addItems(self.ANCHORS)
+        self.combo_anchor.setCurrentText('oben links')
+        f_anchor.addRow(tr('Plankopf-Position:'), self.combo_anchor)
+        root.addWidget(grp_anchor)
 
         grp2 = QGroupBox(tr('Seitengrösse überschreiben'))
         grp2.setCheckable(True); grp2.setChecked(False)
@@ -303,6 +314,7 @@ class FaltmarkenDialog(QDialog):
             'change_size':  change_size,
             'page_width':   w,
             'page_height':  h,
+            'anchor':       self.combo_anchor.currentText(),
             'mark_len':     self.spin_len.value(),
             'line_width':   self.spin_w.value(),
             'remove_old':   self.chk_remove.isChecked(),
@@ -355,7 +367,7 @@ class TemplateDialog(QDialog):
         f2.addRow(tr('Layoutname:'), self.edit_name)
         self.combo_anchor = QComboBox()
         self.combo_anchor.addItems(self.ANCHORS)
-        self.combo_anchor.setCurrentText('unten rechts')
+        self.combo_anchor.setCurrentText('oben links')
         f2.addRow(tr('Plankopf-Position:'), self.combo_anchor)
         root.addWidget(grp2)
 
@@ -539,7 +551,7 @@ class MapExtentDialog(QDialog):
         f_lay.addRow(tr('Layoutname:'), self.edit_name)
         self.combo_anchor = QComboBox()
         self.combo_anchor.addItems(self.ANCHORS)
-        self.combo_anchor.setCurrentText('unten rechts')
+        self.combo_anchor.setCurrentText('oben links')
         f_lay.addRow(tr('Plankopf-Position:'), self.combo_anchor)
         root.addWidget(grp_lay)
 

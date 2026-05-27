@@ -194,12 +194,13 @@ def add_a4_raster_faltmarken(iface, parent=None):
     if vals['change_size']:
         _set_page_size(layout, vals['page_width'], vals['page_height'])
 
-    # Anchor aus Layout-Items ableiten falls möglich (Fallback: unten rechts)
+    anchor = vals['anchor']
+
     draw_faltmarken(
         layout,
         mark_len     = vals['mark_len'],
         line_width   = vals['line_width'],
-        anchor       = 'unten rechts',
+        anchor       = anchor,
         remove_old   = vals['remove_old'],
         add_border   = vals['add_border'],
         border_width = vals['border_width'],
