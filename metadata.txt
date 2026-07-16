@@ -2,11 +2,23 @@
 name=Layout Maker
 qgisMinimumVersion=3.0
 qgisMaximumVersion=4.99
-description=Layout Maker mit UI, Logo, Faltmarken-Funktion und Mehrsprachen-Support.
+description=Fast print layouts: fold marks, title block placement, and map plans from a drawn extent or predefined paper size.
 version=0.2.0
 author=Claude Widmer
-email=example@example.com
-about=QGIS-4-Plugin mit UI-Dialog, Startbutton, A4-Faltmarken, Faltmarkendicke und echter i18n-Unterstützung.
+email=claude.widmer@gmx.ch
+about=Layout Maker speeds up everyday QGIS print layout work for surveyors, planners and GIS professionals.
+
+ Features:
+ - Fold marks: add or remove folding marks on any print layout, grid size configurable (A4, A3, A2, A1, A0, custom)
+ - Title block (Plankopf/cartouche): attach a title block template to any corner of a new plan; the map area fills the rest of the page automatically
+ - Two ways to create a plan: draw a map extent on the canvas, or pick a predefined paper size
+ - Multi-language interface: German, English, French
+ - Works in both QGIS 3.x (Qt5) and QGIS 4.x (Qt6)
+ - Built-in help page with diagrams, reachable from the plugin dialog
+
+ Ideal for producing consistent, print-ready site plans and technical drawings (Situationspläne).
 category=Layout
 icon=icons/logo.png
 hasProcessingProvider=no
+homepage=https://www.claudewidmer.ch/layout-maker
+tags=layout,print layout,print,plan,map,title block,fold marks,falzmarken,plankopf,cartouche,atlas,printing,cartography,template,surveying,engineering,scale,site plan,situationsplan,qpt

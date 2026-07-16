@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-faltmarken_script.py  –  kompatibel mit QGIS 3 (PyQt5) und QGIS 4 (PyQt6)
+falzmarken_script.py  –  kompatibel mit QGIS 3 (PyQt5) und QGIS 4 (PyQt6)
 
 Strichstärke wird korrekt in mm gesetzt via QgsSimpleLineSymbolLayer,
 da QPen.setWidthF() Qt-Pixel (nicht mm) verwendet.
 
 Hinweis: Der «Ursprung»-Parameter wurde entfernt. Der Ursprung ergibt sich
-immer automatisch aus der Plankopf-Position (anchor), die dem draw_faltmarken-
+immer automatisch aus der Plankopf-Position (anchor), die dem draw_falzmarken-
 Aufruf übergeben wird.
 """
 
@@ -21,6 +21,7 @@ from qgis.core import (
     QgsSimpleLineSymbolLayer,
     QgsProject,
 )
+from .settings import get_falzmarken_raster
 
 try:
     from qgis.core import QgsUnitTypes
@@ -33,13 +34,15 @@ except AttributeError:
 
 
 def tr(msg):
-    return QCoreApplication.translate('FaltmarkenScript', msg)
+    # '@default': siehe Kommentar in dialogs.py.tr() — muss mit dem von
+    # pylupdate5 für freie tr()-Aufrufe vergebenen Kontext übereinstimmen.
+    return QCoreApplication.translate('@default', msg)
 
 
 # ── Anker → (from_right, from_bottom) ────────────────────────────────────────
-# Der Ursprung der Faltmarken wird immer aus der Plankopf-Position abgeleitet:
-# Plankopf unten rechts  → Faltmarken-Ursprung unten rechts
-# Plankopf oben links    → Faltmarken-Ursprung oben links  ... usw.
+# Der Ursprung der Falzmarken wird immer aus der Plankopf-Position abgeleitet:
+# Plankopf unten rechts  → Falzmarken-Ursprung unten rechts
+# Plankopf oben links    → Falzmarken-Ursprung oben links  ... usw.
 
 _ANCHOR_TO_ORIGIN = {
     'oben links':   (False, False),
@@ -47,10 +50,6 @@ _ANCHOR_TO_ORIGIN = {
     'unten links':  (False, True),
     'unten rechts': (True,  True),
 }
-
-# Rückwärtskompatibilität: ORIGIN_LABELS wird nicht mehr im Dialog verwendet,
-# bleibt aber als leere Liste erhalten damit alte Importe nicht brechen.
-ORIGIN_LABELS = []
 
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
@@ -116,7 +115,7 @@ def _set_page_size(layout, width_mm, height_mm):
 
 # ── Kernfunktion ──────────────────────────────────────────────────────────────
 
-def draw_faltmarken(
+def draw_falzmarken(
     layout,
     mark_len=6.0,
     line_width=0.25,
@@ -124,21 +123,29 @@ def draw_faltmarken(
     remove_old=True,
     add_border=True,
     border_width=0.5,
+    raster_w=None,
+    raster_h=None,
 ):
     """
-    Setzt Falt-/Schnittmarken im A4-Raster (210 mm x 297 mm).
+    Setzt Falt-/Schnittmarken im konfigurierten Raster (Standard A4,
+    210 x 297 mm; einstellbar über die Layout-Maker-Einstellungen).
 
     Parameters
     ----------
     layout       : QgsPrintLayout
     mark_len     : Länge jeder Marke in mm
-    line_width   : Strichstärke Faltmarken in mm
+    line_width   : Strichstärke Falzmarken in mm
     anchor       : Plankopf-Position – 'oben links' | 'oben rechts' |
                    'unten links' | 'unten rechts'  (bestimmt den Ursprung)
     remove_old   : Bestehende fm_*-Items vorher löschen
     add_border   : Rahmen um das Layout zeichnen
     border_width : Strichstärke Rahmen in mm
+    raster_w     : Rasterbreite in mm (None = aktuelle Einstellung, Standard A4)
+    raster_h     : Rasterhöhe in mm (None = aktuelle Einstellung, Standard A4)
     """
+    if raster_w is None or raster_h is None:
+        raster_w, raster_h = get_falzmarken_raster()
+
     page = layout.pageCollection().page(0)
     W    = page.pageSize().width()
     H    = page.pageSize().height()
@@ -148,8 +155,8 @@ def draw_faltmarken(
         _remove_fm_items(layout)
 
     sym = _make_symbol(line_width)
-    xs  = list(_frange(W, 0.0, -210.0) if r else _frange(0.0, W, 210.0))
-    ys  = list(_frange(H, 0.0, -297.0) if b else _frange(0.0, H, 297.0))
+    xs  = list(_frange(W, 0.0, -raster_w) if r else _frange(0.0, W, raster_w))
+    ys  = list(_frange(H, 0.0, -raster_h) if b else _frange(0.0, H, raster_h))
 
     for i, x in enumerate(xs):
         _line(layout, sym, x, 0,          x, mark_len,  f'fm_vt_{i}')
@@ -168,10 +175,10 @@ def draw_faltmarken(
         _line(layout, bsym, 0, H, 0, 0,  'fm_border_l')
 
 
-# ── Dialog-Einstiegspunkt ─────────────────────────────────────────────────────
+# ── Dialog-Einstiegspunkte ────────────────────────────────────────────────────
 
-def add_a4_raster_faltmarken(iface, parent=None):
-    from .dialogs import FaltmarkenDialog
+def add_falzmarken(iface, parent=None):
+    from .dialogs import FalzmarkenDialog
 
     manager = QgsProject.instance().layoutManager()
     layouts = manager.layouts()
@@ -180,7 +187,7 @@ def add_a4_raster_faltmarken(iface, parent=None):
                             tr('Es sind keine Layouts vorhanden.'))
         return
 
-    dlg = FaltmarkenDialog([l.name() for l in layouts], parent)
+    dlg = FalzmarkenDialog([l.name() for l in layouts], parent)
     if dlg.exec() != QDialog.DialogCode.Accepted:
         return
 
@@ -191,12 +198,9 @@ def add_a4_raster_faltmarken(iface, parent=None):
                             tr('Layout nicht gefunden.'))
         return
 
-    if vals['change_size']:
-        _set_page_size(layout, vals['page_width'], vals['page_height'])
-
     anchor = vals['anchor']
 
-    draw_faltmarken(
+    draw_falzmarken(
         layout,
         mark_len     = vals['mark_len'],
         line_width   = vals['line_width'],
@@ -208,5 +212,33 @@ def add_a4_raster_faltmarken(iface, parent=None):
 
     QMessageBox.information(
         parent, tr('Layout Maker'),
-        tr('Faltmarken wurden auf \u201e{0}\u201c gesetzt.').format(layout.name())
+        tr('Falzmarken wurden auf „{0}“ gesetzt.').format(layout.name())
+    )
+
+
+def remove_falzmarken(iface, parent=None):
+    from .dialogs import RemoveFalzmarkenDialog
+
+    manager = QgsProject.instance().layoutManager()
+    layouts = manager.layouts()
+    if not layouts:
+        QMessageBox.warning(parent, tr('Layout Maker'),
+                            tr('Es sind keine Layouts vorhanden.'))
+        return
+
+    dlg = RemoveFalzmarkenDialog([l.name() for l in layouts], parent)
+    if dlg.exec() != QDialog.DialogCode.Accepted:
+        return
+
+    layout_name = dlg.get_layout_name()
+    layout = next((l for l in layouts if l.name() == layout_name), None)
+    if layout is None:
+        QMessageBox.warning(parent, tr('Layout Maker'),
+                            tr('Layout nicht gefunden.'))
+        return
+
+    _remove_fm_items(layout)
+    QMessageBox.information(
+        parent, tr('Layout Maker'),
+        tr('Falzmarken wurden von „{0}“ entfernt.').format(layout.name())
     )

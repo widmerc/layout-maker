@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Layout Maker – Hilfe</title>
+<style>
+  :root {
+    --brand: #2c5f6e;
+    --brand-light: #3d8fa0;
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --border: #d8d8d8;
+    --text: #2a2a2a;
+    --muted: #666666;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: var(--brand);
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  header img { width: 44px; height: 44px; border-radius: 8px; background: #fff; }
+  header h1 { margin: 0; font-size: 1.4rem; }
+  header p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.85; }
+  nav.langs { margin-left: auto; display: flex; gap: 6px; }
+  nav.langs button {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  nav.langs button.active { background: #fff; color: var(--brand); }
+
+  main { max-width: 880px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  section.card h2 {
+    color: var(--brand);
+    font-size: 1.15rem;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  section.card h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-size: 0.85rem;
+    flex: none;
+  }
+  section.card p { color: var(--text); }
+  section.card .muted { color: var(--muted); font-size: 0.9rem; }
+
+  .diagram-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin: 14px 0;
+  }
+  .diagram-box {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .diagram-box svg { display: block; margin: 0 auto 6px; }
+
+  table.keyval { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  table.keyval td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.keyval td:first-child { font-weight: 600; color: var(--brand); white-space: nowrap; width: 1%; }
+
+  .btn-sample {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin: 2px 4px 2px 0;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-secondary { background: #fff; color: var(--brand); border: 2px solid var(--brand); }
+  .btn-destructive { background: #fff; color: #a03030; border: 2px solid #a03030; }
+
+  code { background: #eef3f4; padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 20px; }
+
+  [data-lang-content] { display: none; }
+  [data-lang-content].active { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1f21;
+      --card: #24292b;
+      --border: #3a4144;
+      --text: #e8e8e8;
+      --muted: #a0a8ab;
+    }
+    code { background: #33393b; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../icons/logo.png" alt="Layout Maker" onerror="this.style.display='none'">
+  <div>
+    <h1>Layout Maker</h1>
+    <p data-lang-content data-lang="de" class="active">QGIS-Plugin für Falzmarken und Pläne mit Plankopf</p>
+    <p data-lang-content data-lang="en">QGIS plugin for fold marks and plans with a title block</p>
+    <p data-lang-content data-lang="fr">Plugin QGIS pour les marques de pliage et les plans avec cartouche</p>
+  </div>
+  <nav class="langs">
+    <button data-lang-btn="de" class="active" onclick="setLang('de')">DE</button>
+    <button data-lang-btn="en" onclick="setLang('en')">EN</button>
+    <button data-lang-btn="fr" onclick="setLang('fr')">FR</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ───────────────────────── Überblick ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2>Überblick</h2>
+    <p>Layout Maker hat zwei Funktionen, erreichbar über den Hauptdialog (Symbolleiste oder Menü <em>Layout Maker</em>):</p>
+    <table class="keyval">
+      <tr><td>① Falzmarken</td><td>Falzmarken auf einem <strong>bestehenden</strong> Print-Layout setzen oder entfernen.</td></tr>
+      <tr><td>② Plan erstellen</td><td>Einen <strong>neuen</strong> Plan erzeugen – per Kartenausschnitt oder mit vordefinierter Grösse, optional mit Plankopf.</td></tr>
+    </table>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2>Overview</h2>
+    <p>Layout Maker has two features, reachable from the main dialog (toolbar or <em>Layout Maker</em> menu):</p>
+    <table class="keyval">
+      <tr><td>① Fold marks</td><td>Set or remove fold marks on an <strong>existing</strong> print layout.</td></tr>
+      <tr><td>② Create plan</td><td>Build a <strong>new</strong> plan – by drawing a map extent or with a predefined size, optionally with a title block.</td></tr>
+    </table>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2>Aperçu</h2>
+    <p>Layout Maker propose deux fonctions, accessibles depuis la boîte de dialogue principale (barre d'outils ou menu <em>Layout Maker</em>) :</p>
+    <table class="keyval">
+      <tr><td>① Marques de pliage</td><td>Ajouter ou supprimer les marques de pliage sur une mise en page <strong>existante</strong>.</td></tr>
+      <tr><td>② Créer un plan</td><td>Créer un <strong>nouveau</strong> plan – en dessinant une emprise ou avec une taille prédéfinie, avec cartouche en option.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ───────────────────────── Falzmarken ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2><span class="num">1</span> Falzmarken</h2>
+    <p>Falzmarken sind kurze Strichmarkierungen am Rand eines Plans, verteilt nach einem festen Raster (Standard A4, 210 × 297&nbsp;mm) – sie zeigen, wo ein grosses Blatt gefaltet werden muss, damit es z. B. in einen Bundordner passt. Das Rastermass lässt sich unter dem <strong>⚙ Einstellungen</strong>-Symbol im Hauptdialog anpassen (z. B. auf A3). Das Ziel-Layout muss bereits im Projekt existieren.</p>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2><span class="num">1</span> Fold marks</h2>
+    <p>Fold marks are short tick marks along the edge of a plan, spaced to a fixed grid (default A4, 210 × 297&nbsp;mm) – they show where a large sheet must be folded, e.g. to fit into a binder. The grid size can be changed under the <strong>⚙ Settings</strong> icon in the main dialog (e.g. to A3). The target layout must already exist in the project.</p>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2><span class="num">1</span> Marques de pliage</h2>
+    <p>Les marques de pliage sont de courts traits de repère le long du bord d'un plan, espacés selon une grille fixe (par défaut A4, 210 × 297&nbsp;mm) – ils indiquent où plier une grande feuille, p. ex. pour un classeur. La taille de la grille peut être modifiée sous l'icône <strong>⚙ Paramètres</strong> dans la boîte de dialogue principale (p. ex. en A3). La mise en page cible doit déjà exister dans le projet.</p>
+  </div>
+
+  <div class="diagram-row">
+    <div class="diagram-box">
+      <svg width="180" height="130" viewBox="0 0 180 130">
+        <rect x="10" y="10" width="160" height="110" fill="none" stroke="#2c5f6e" stroke-width="2"/>
+        <!-- Rasterlinien (gestrichelt) -->
+        <g stroke="#8ab6bf" stroke-width="1" stroke-dasharray="3,3">
+          <line x1="63" y1="10" x2="63" y2="120"/>
+          <line x1="116" y1="10" x2="116" y2="120"/>
+          <line x1="10" y1="65" x2="170" y2="65"/>
+        </g>
+        <!-- Falzmarken: kurze, nach innen zeigende Striche an den Rasterschnittpunkten der Kanten -->
+        <g stroke="#2c5f6e" stroke-width="2.5">
+          <line x1="63" y1="10" x2="63" y2="20"/><line x1="63" y1="110" x2="63" y2="120"/>
+          <line x1="116" y1="10" x2="116" y2="20"/><line x1="116" y1="110" x2="116" y2="120"/>
+          <line x1="10" y1="65" x2="20" y2="65"/><line x1="160" y1="65" x2="170" y2="65"/>
+        </g>
+      </svg>
+      <span data-lang-content data-lang="de" class="active">Raster (gestrichelt) + Falzmarken (kurze Striche an den Kanten)</span>
+      <span data-lang-content data-lang="en">Grid (dashed) + fold marks (short ticks on the edges)</span>
+      <span data-lang-content data-lang="fr">Grille (pointillés) + marques de pliage (courts traits sur les bords)</span>
+    </div>
+  </div>
+
+  <div data-lang-content data-lang="de" class="active">
+    <table class="keyval">
+      <tr><td><span class="btn-sample btn-primary">Falzmarken hinzufügen …</span></td><td>Öffnet den Dialog mit allen Parametern (Markenlänge, Strichstärke, Rahmen, Plankopf-Position); bestätigt wird mit <span class="btn-sample btn-primary" style="padding:2px 8px;">Falzmarken setzen</span>. Alte <code>fm_*</code>-Marken können vorher automatisch gelöscht werden.</td></tr>
+      <tr><td><span class="btn-sample btn-destructive">Falzmarken entfernen …</span></td><td>Einfacher Dialog: nur Ziel-Layout wählen und bestätigen – entfernt alle vorhandenen Falzmarken (<code>fm_*</code>-Objekte), ohne neue zu setzen.</td></tr>
+    </table>
+  </div>
+  <div data-lang-content data-lang="en">
+    <table class="keyval">
+      <tr><td><span class="btn-sample btn-primary">Add fold marks …</span></td><td>Opens the dialog with all parameters (mark length, line width, border, title block position); confirmed with <span class="btn-sample btn-primary" style="padding:2px 8px;">Set fold marks</span>. Existing <code>fm_*</code> marks can be deleted first automatically.</td></tr>
+      <tr><td><span class="btn-sample btn-destructive">Remove fold marks …</span></td><td>Simple dialog: just pick the target layout and confirm – removes all existing fold marks (<code>fm_*</code> objects), without drawing new ones.</td></tr>
+    </table>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <table class="keyval">
+      <tr><td><span class="btn-sample btn-primary">Ajouter des marques de pliage …</span></td><td>Ouvre la boîte de dialogue avec tous les paramètres (longueur des marques, épaisseur du trait, cadre, position du cartouche) ; confirmé avec <span class="btn-sample btn-primary" style="padding:2px 8px;">Ajouter les marques de pliage</span>. Les marques <code>fm_*</code> existantes peuvent être supprimées au préalable automatiquement.</td></tr>
+      <tr><td><span class="btn-sample btn-destructive">Supprimer les marques de pliage …</span></td><td>Boîte de dialogue simple : choisissez la mise en page cible et confirmez – supprime toutes les marques de pliage existantes (objets <code>fm_*</code>), sans en dessiner de nouvelles.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ───────────────────────── Plankopf ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2><span class="num">2</span> Der Plankopf</h2>
+    <p>Der <strong>Plankopf</strong> ist nur das Kopf-/Stempelfeld einer Vorlage (<code>.qpt</code>) – Logo, Massstab, Projektangaben usw. Er enthält <strong>keine eigene Karte</strong>. Er belegt eine Spalte an der linken oder rechten Seite der Seite (über die volle Höhe reserviert); die Kartenfläche füllt automatisch die jeweils andere Spalte.</p>
+    <p><strong>links / rechts</strong> in der Plankopf-Position wählt die Spalte. <strong>oben / unten</strong> bestimmt, wie der Plankopf-Inhalt <em>innerhalb</em> dieser Spalte ausgerichtet wird – füllt er die Spalte nicht ganz aus, bleibt der Rest davon leer (kein Karteninhalt rutscht dort hinein).</p>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2><span class="num">2</span> The title block</h2>
+    <p>The <strong>title block</strong> is only the header/stamp field of a template (<code>.qpt</code>) – logo, scale, project details, etc. It contains <strong>no map of its own</strong>. It occupies a column on the left or right side of the page (reserved for the full page height); the map area automatically fills the other column.</p>
+    <p><strong>left / right</strong> in the title block position chooses the column. <strong>top / bottom</strong> determines how the title block content is aligned <em>within</em> that column – if it doesn't fill the whole column, the rest of it stays blank (the map does not flow into it).</p>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2><span class="num">2</span> Le cartouche</h2>
+    <p>Le <strong>cartouche</strong> est uniquement l'en-tête/le tampon d'un modèle (<code>.qpt</code>) – logo, échelle, informations du projet, etc. Il ne contient <strong>pas de carte propre</strong>. Il occupe une colonne à gauche ou à droite de la page (réservée sur toute la hauteur) ; la zone cartographique remplit automatiquement l'autre colonne.</p>
+    <p><strong>gauche / droite</strong> dans la position du cartouche choisit la colonne. <strong>haut / bas</strong> détermine comment le contenu du cartouche est aligné <em>dans</em> cette colonne – s'il ne la remplit pas entièrement, le reste demeure vide (la carte n'y déborde pas).</p>
+  </div>
+
+  <div class="diagram-row" id="plankopf-diagrams"></div>
+
+  <div data-lang-content data-lang="de" class="active">
+    <p class="muted">Beispiel oben links: Plankopf-Position „oben links" → linke Spalte, Inhalt oben ausgerichtet; die Karte füllt die rechte Spalte über die volle Höhe.</p>
+  </div>
+  <div data-lang-content data-lang="en">
+    <p class="muted">Example top-left: title block position "top left" → left column, content aligned to the top; the map fills the right column over the full height.</p>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <p class="muted">Exemple en haut à gauche : position du cartouche « en haut à gauche » → colonne de gauche, contenu aligné en haut ; la carte remplit la colonne de droite sur toute la hauteur.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Vorlage erstellen ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2>Plankopf-Vorlage (.qpt) erstellen</h2>
+    <p>Damit die Platzierung korrekt funktioniert, muss die <code>.qpt</code>-Datei <strong>nur</strong> die Plankopf-Elemente enthalten (kein Kartenrahmen, kein Seitenhintergrund):</p>
+    <ol>
+      <li>Print-Layout in QGIS öffnen (oder neu erstellen) und die Plankopf-Elemente (Logo, Textfelder, Tabelle usw.) bauen bzw. platzieren.</li>
+      <li><strong>Wichtig:</strong> Diese Elemente möglichst nahe an die Ecke <strong>oben links</strong> der Seite setzen (nicht mittig oder mit grossem Abstand zum Seitenrand) – der Plugin berechnet die Spaltenbreite/-höhe aus der Bounding Box dieser Elemente. Ist viel Leerraum um die Elemente herum, wird die reservierte Spalte unnötig gross.</li>
+      <li>Alle Plankopf-Elemente mit der Maus markieren (Kartenrahmen/Hintergrundrechteck <strong>nicht</strong> mit auswählen).</li>
+      <li>Rechtsklick → <strong>„Ausgewählte Elemente als Vorlage speichern…"</strong> (nicht „Layout als Vorlage speichern" – das würde die ganze Seite inkl. Grösse mit abspeichern).</li>
+      <li>Die gespeicherte <code>.qpt</code>-Datei im Dialog „Plan erstellen" unter „Plankopf-Vorlage" auswählen.</li>
+    </ol>
+    <p class="muted">Tipp: Enthält die Vorlage projektspezifische Textfelder (z. B. Titel, Massstab), können diese als QGIS-Ausdrücke/Layoutvariablen eingesetzt werden, die das Plugin beim Erstellen automatisch befüllt (<code>Titel</code>, <code>Massstab</code>).</p>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2>Building a title block template (.qpt)</h2>
+    <p>For the placement to work correctly, the <code>.qpt</code> file must contain <strong>only</strong> the title block elements (no map frame, no page background):</p>
+    <ol>
+      <li>Open (or create) a print layout in QGIS and build/place the title block elements (logo, text fields, table, etc.).</li>
+      <li><strong>Important:</strong> position these elements as close as possible to the <strong>top-left</strong> corner of the page (not centred or with a large gap to the page edge) – the plugin calculates the column width/height from the bounding box of these elements. Lots of empty space around them makes the reserved column unnecessarily large.</li>
+      <li>Select all title block elements with the mouse (do <strong>not</strong> include the map frame/background rectangle).</li>
+      <li>Right-click → <strong>"Save Selected Items as Template…"</strong> (not "Save Layout as Template" – that would also save the whole page including its size).</li>
+      <li>Pick the saved <code>.qpt</code> file under "Title block template" in the "Create plan" dialog.</li>
+    </ol>
+    <p class="muted">Tip: if the template contains project-specific text fields (e.g. title, scale), these can use QGIS expressions/layout variables that the plugin fills in automatically when creating the plan (<code>Titel</code>, <code>Massstab</code>).</p>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2>Créer un modèle de cartouche (.qpt)</h2>
+    <p>Pour que le placement fonctionne correctement, le fichier <code>.qpt</code> doit contenir <strong>uniquement</strong> les éléments du cartouche (pas de cadre de carte, pas d'arrière-plan de page) :</p>
+    <ol>
+      <li>Ouvrez (ou créez) une mise en page dans QGIS et construisez/placez les éléments du cartouche (logo, champs de texte, tableau, etc.).</li>
+      <li><strong>Important :</strong> placez ces éléments le plus près possible du coin <strong>supérieur gauche</strong> de la page (pas centrés ni avec un grand espace par rapport au bord) – le plugin calcule la largeur/hauteur de la colonne à partir de la boîte englobante de ces éléments. Un grand espace vide autour d'eux rend la colonne réservée inutilement grande.</li>
+      <li>Sélectionnez tous les éléments du cartouche avec la souris (<strong>sans</strong> inclure le cadre de carte/rectangle d'arrière-plan).</li>
+      <li>Clic droit → <strong>« Enregistrer les éléments sélectionnés comme modèle… »</strong> (pas « Enregistrer la mise en page comme modèle », qui sauvegarderait aussi toute la page, taille comprise).</li>
+      <li>Choisissez le fichier <code>.qpt</code> enregistré sous « Modèle de cartouche » dans la boîte de dialogue « Créer un plan ».</li>
+    </ol>
+    <p class="muted">Astuce : si le modèle contient des champs de texte spécifiques au projet (p. ex. titre, échelle), ceux-ci peuvent utiliser des expressions QGIS/variables de mise en page que le plugin remplit automatiquement lors de la création (<code>Titel</code>, <code>Massstab</code>).</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Plan erstellen ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2><span class="num">3</span> Plan erstellen</h2>
+    <p>Baut ein komplett neues Layout. Die Kartenfläche kommt auf einem von zwei Wegen zustande:</p>
+    <table class="keyval">
+      <tr><td>Ausschnitt aufziehen</td><td>Auf der Karte ein Rechteck aufziehen (oder den aktuellen Ausschnitt übernehmen) und einen Massstab eingeben – die Plangrösse wird daraus berechnet.</td></tr>
+      <tr><td>Vordefinierte Plangrösse</td><td>Ein Papierformat (A0–A4 oder benutzerdefiniert, Hoch-/Querformat) und einen Massstab wählen. Der Kartenausschnitt wird automatisch <strong>zentriert auf den Mittelpunkt des aktuell sichtbaren Kartenausschnitts</strong> berechnet.</td></tr>
+    </table>
+    <p>In beiden Fällen ist der Plankopf optional (siehe oben), und Falzmarken/Rahmen werden automatisch mit dem gewählten Parametern hinzugefügt.</p>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2><span class="num">3</span> Create plan</h2>
+    <p>Builds a completely new layout. The map area is determined in one of two ways:</p>
+    <table class="keyval">
+      <tr><td>Draw extent</td><td>Draw a rectangle on the map (or use the current extent) and enter a scale – the plan size is calculated from that.</td></tr>
+      <tr><td>Predefined plan size</td><td>Choose a paper format (A0–A4 or custom, portrait/landscape) and a scale. The map extent is calculated automatically, <strong>centred on the middle of the currently visible map view</strong>.</td></tr>
+    </table>
+    <p>In both cases the title block is optional (see above), and fold marks/border are added automatically with the chosen parameters.</p>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2><span class="num">3</span> Créer un plan</h2>
+    <p>Crée une toute nouvelle mise en page. La zone cartographique est déterminée de deux façons :</p>
+    <table class="keyval">
+      <tr><td>Dessiner l'emprise</td><td>Dessinez un rectangle sur la carte (ou reprenez l'emprise actuelle) et indiquez une échelle – la taille du plan en est déduite.</td></tr>
+      <tr><td>Taille de plan prédéfinie</td><td>Choisissez un format de papier (A0–A4 ou personnalisé, portrait/paysage) et une échelle. L'emprise de la carte est calculée automatiquement, <strong>centrée sur le milieu de la vue actuellement visible</strong>.</td></tr>
+    </table>
+    <p>Dans les deux cas, le cartouche est facultatif (voir ci-dessus), et les marques de pliage/le cadre sont ajoutés automatiquement selon les paramètres choisis.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── Tipps ───────────────────────── -->
+<section class="card">
+  <div data-lang-content data-lang="de" class="active">
+    <h2>Tipps</h2>
+    <ul>
+      <li>Die Oberfläche folgt der QGIS-Spracheinstellung (Deutsch, Englisch, Französisch); weitere Sprachen fallen auf Deutsch zurück.</li>
+      <li>Layoutnamen müssen im Projekt eindeutig sein.</li>
+      <li>Kompatibel mit QGIS 3.x und QGIS 4.x (Qt5 &amp; Qt6).</li>
+    </ul>
+  </div>
+  <div data-lang-content data-lang="en">
+    <h2>Tips</h2>
+    <ul>
+      <li>The interface follows the QGIS language setting (German, English, French); other languages fall back to German.</li>
+      <li>Layout names must be unique within the project.</li>
+      <li>Compatible with QGIS 3.x and QGIS 4.x (Qt5 &amp; Qt6).</li>
+    </ul>
+  </div>
+  <div data-lang-content data-lang="fr">
+    <h2>Astuces</h2>
+    <ul>
+      <li>L'interface suit la langue de QGIS (allemand, anglais, français) ; les autres langues reviennent à l'allemand.</li>
+      <li>Les noms de mise en page doivent être uniques dans le projet.</li>
+      <li>Compatible avec QGIS 3.x et QGIS 4.x (Qt5 &amp; Qt6).</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>Layout Maker · <a href="https://www.claudewidmer.ch/layout-maker" style="color:inherit">claudewidmer.ch/layout-maker</a></footer>
+
+<script>
+function corner(cx, cy, w, h, colw, anchor) {
+  // Spalten-Modell: Plankopf-Spalte (colw breit, volle Höhe h) links oder
+  // rechts; darin ein kleinerer Inhalts-Block, oben oder unten ausgerichtet.
+  // Die Karte (hellblau) füllt immer die andere Spalte, volle Höhe.
+  var top = anchor.indexOf('top') === 0;
+  var left = anchor.indexOf('left') >= 0;
+  var contentH = h * 0.45;
+  var colX = left ? cx : cx + w - colw;
+  var mapX = left ? cx + colw : cx;
+  var mapW = w - colw;
+  var contentY = top ? cy : cy + h - contentH;
+  var s = '';
+  s += '<rect x="'+cx+'" y="'+cy+'" width="'+w+'" height="'+h+'" fill="none" stroke="#2c5f6e" stroke-width="2"/>';
+  s += '<rect x="'+mapX+'" y="'+cy+'" width="'+mapW+'" height="'+h+'" fill="#eef6f8"/>';
+  s += '<rect x="'+colX+'" y="'+contentY+'" width="'+colw+'" height="'+contentH+'" fill="#2c5f6e"/>';
+  return s;
+}
+(function () {
+  var anchors = [
+    ['top-left','oben links','top left','en haut à gauche'],
+    ['top-right','oben rechts','top right','en haut à droite'],
+    ['bottom-left','unten links','bottom left','en bas à gauche'],
+    ['bottom-right','unten rechts','bottom right','en bas à droite']
+  ];
+  var host = document.getElementById('plankopf-diagrams');
+  anchors.forEach(function (a) {
+    var svg = '<svg width="120" height="90" viewBox="0 0 120 90">' + corner(10,10,100,70,28,a[0]) + '</svg>';
+    var div = document.createElement('div');
+    div.className = 'diagram-box';
+    div.innerHTML = svg +
+      '<span data-lang-content data-lang="de"'+(a[0]==='top-left'?' class="active"':'')+'>'+a[1]+'</span>' +
+      '<span data-lang-content data-lang="en">'+a[2]+'</span>' +
+      '<span data-lang-content data-lang="fr">'+a[3]+'</span>';
+    host.appendChild(div);
+  });
+  setLang('de');
+})();
+
+function setLang(lang) {
+  document.querySelectorAll('[data-lang-content]').forEach(function (el) {
+    el.classList.toggle('active', el.getAttribute('data-lang') === lang);
+  });
+  document.querySelectorAll('[data-lang-btn]').forEach(function (el) {
+    el.classList.toggle('active', el.getAttribute('data-lang-btn') === lang);
+  });
+  document.documentElement.setAttribute('lang', lang);
+}
+</script>
+
+</body>
+</html>
